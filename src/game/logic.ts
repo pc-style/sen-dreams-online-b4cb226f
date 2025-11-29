@@ -63,6 +63,7 @@ export function createInitialGameState(
     pendingEffect: null,
     targetScore,
     version: 1,
+    wakeUpCallerId: null,
   };
 }
 
@@ -211,6 +212,7 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
       
     case 'DECLARE_WAKE_UP':
       // Per rules: Round ends IMMEDIATELY when Pobudka is called
+      newState.wakeUpCallerId = playerId; // Track who called it
       endRound(newState);
       break;
       
@@ -293,10 +295,8 @@ function endTurn(state: GameState) {
 function endRound(state: GameState) {
   state.phase = 'scoring';
   
-  // Find lowest score for penalty calculation
+  // First pass: calculate raw scores and reveal cards
   let lowestScore = Infinity;
-  
-  // First pass: calculate raw scores
   for (const player of state.players) {
     player.roundScore = 0;
     for (const slot of player.dreamSlots) {
@@ -308,7 +308,14 @@ function endRound(state: GameState) {
     lowestScore = Math.min(lowestScore, player.roundScore);
   }
   
-  // Add scores to total (no penalty system in current implementation)
+  // Apply Pobudka penalty per rules:
+  // If caller does NOT have lowest (or tied lowest) score, add +5 penalty
+  const caller = state.players.find(p => p.playerId === state.wakeUpCallerId);
+  if (caller && caller.roundScore > lowestScore) {
+    caller.roundScore += 5; // Penalty for wrong call
+  }
+  
+  // Add round scores to totals
   for (const player of state.players) {
     player.totalScore += player.roundScore;
   }
@@ -347,6 +354,7 @@ export function startNewRound(state: GameState): GameState {
   newState.drawnCard = null;
   newState.takeTwoCards = null;
   newState.pendingEffect = null;
+  newState.wakeUpCallerId = null;
   
   return newState;
 }
