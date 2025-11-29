@@ -1,108 +1,82 @@
 /**
  * Sen Card Game - Core Types
- * Server-authoritative game state with hidden information
  */
 
-// Card effect types
+// Card effect types per rules
 export type EffectType = 
-  | 'none'           // Normal card, no effect
-  | 'peek_own'       // Peek at one of your own dream cards
-  | 'peek_other'     // Peek at another player's dream card
-  | 'swap_blind'     // Swap two cards without looking
-  | 'swap_peek'      // Peek then optionally swap
-  | 'dark_gift';     // Give a high-value card to another player
+  | 'none'           // Normal card
+  | 'take_two'       // Weź 2 - Draw 2, keep 1
+  | 'peek_any'       // Podejrzyj 1 - Peek at any card
+  | 'swap_blind';    // Zamień 2 - Swap any 2 blindly
 
-// Card definition (static data)
 export interface CardDefinition {
   id: string;
   name: string;
-  crowValue: number;       // 0-9 crow value (lower is better)
+  crowValue: number;
   effectType: EffectType;
   description: string;
 }
 
-// Card instance (runtime, unique per card in play)
 export interface CardInstance {
   instanceId: string;
   definitionId: string;
 }
 
-// Dream slot state
 export interface DreamSlot {
   card: CardInstance | null;
-  isRevealed: boolean;      // True during scoring or after specific reveals
+  isRevealed: boolean;
 }
 
-// Player state in a game
 export interface PlayerState {
   playerId: string;
   playerName: string;
   seatIndex: number;
-  dreamSlots: DreamSlot[];  // 4 slots
+  dreamSlots: DreamSlot[];
   isConnected: boolean;
   roundScore: number;
   totalScore: number;
-  hasSeenInitialCards: boolean;  // Players see first and last card at start
+  hasSeenInitialCards: boolean;
 }
 
-// Game phases
 export type GamePhase = 
   | 'lobby'
   | 'dealing'
-  | 'initial_peek'    // Players peek at their first and last cards
+  | 'initial_peek'
   | 'playing'
-  | 'wake_up'         // Someone declared Pobudka
   | 'scoring'
   | 'game_over';
 
-// Turn phases during playing
 export type TurnPhase =
-  | 'draw'            // Must draw from deck or discard
-  | 'action'          // Choose to replace, discard, or use effect
-  | 'effect'          // Resolving a card effect
-  | 'end';            // Turn ending
+  | 'draw'
+  | 'action'
+  | 'effect'
+  | 'take_two_choose'
+  | 'end';
 
-// Full game state (server-authoritative, complete truth)
 export interface GameState {
   roomId: string;
   phase: GamePhase;
   roundNumber: number;
-  
-  // Deck and discard
-  deck: CardInstance[];           // Face down, only server knows
-  discard: CardInstance[];        // Top card visible to all
-  
-  // Players
+  deck: CardInstance[];
+  discard: CardInstance[];
   players: PlayerState[];
   activePlayerIndex: number;
-  
-  // Current turn state
   turnPhase: TurnPhase;
-  drawnCard: CardInstance | null; // Card currently held by active player
-  
-  // Wake up tracking
-  wakeUpCalledBy: string | null;  // Player ID who called Pobudka
-  
-  // Effect state (for multi-step effects)
+  drawnCard: CardInstance | null;
+  takeTwoCards: CardInstance[] | null;
   pendingEffect: PendingEffect | null;
-  
-  // Target score for game end
   targetScore: number;
-  
-  // State version for optimistic updates
   version: number;
 }
 
-// Pending effect state
 export interface PendingEffect {
   type: EffectType;
   sourcePlayerId: string;
   selectedSlots: { playerId: string; slotIndex: number }[];
-  peekedCard: CardInstance | null;  // For peek effects
-  awaitingSelection: 'own_slot' | 'other_slot' | 'confirm_swap' | null;
+  peekedCard: CardInstance | null;
+  awaitingSelection: 'any_slot' | 'second_slot' | null;
 }
 
-// Actions that players can take
 export type PlayerAction =
   | { type: 'DRAW_FROM_DECK' }
   | { type: 'DRAW_FROM_DISCARD' }
@@ -110,27 +84,22 @@ export type PlayerAction =
   | { type: 'DISCARD_DRAWN_CARD' }
   | { type: 'USE_CARD_EFFECT' }
   | { type: 'DECLARE_WAKE_UP' }
-  | { type: 'SELECT_OWN_SLOT'; slotIndex: number }
-  | { type: 'SELECT_OTHER_SLOT'; targetPlayerId: string; slotIndex: number }
-  | { type: 'CONFIRM_SWAP' }
+  | { type: 'SELECT_SLOT'; targetPlayerId: string; slotIndex: number }
   | { type: 'CANCEL_EFFECT' }
-  | { type: 'ACKNOWLEDGE_INITIAL_PEEK' };
+  | { type: 'ACKNOWLEDGE_INITIAL_PEEK' }
+  | { type: 'CHOOSE_TAKE_TWO_CARD'; cardIndex: number };
 
-// Public view of a card (what a player is allowed to see)
 export interface PublicCardView {
   instanceId: string;
-  // If null, card is face-down/hidden
   visible: CardDefinition | null;
 }
 
-// Public view of a dream slot
 export interface PublicDreamSlotView {
   hasCard: boolean;
   card: PublicCardView | null;
   isRevealed: boolean;
 }
 
-// Public view of a player (what others see)
 export interface PublicPlayerView {
   playerId: string;
   playerName: string;
@@ -142,49 +111,31 @@ export interface PublicPlayerView {
   isActivePlayer: boolean;
 }
 
-// The filtered view sent to each player
 export interface PlayerGameView {
   roomId: string;
   phase: GamePhase;
   roundNumber: number;
-  
-  // My own state (I can see my cards)
   myPlayerId: string;
   myDreamSlots: PublicDreamSlotView[];
   myTotalScore: number;
   myRoundScore: number;
   hasSeenInitialCards: boolean;
-  
-  // Other players (filtered view)
   players: PublicPlayerView[];
-  
-  // Visible game elements
   deckCount: number;
   topDiscard: PublicCardView | null;
-  
-  // Turn info
   activePlayerIndex: number;
   isMyTurn: boolean;
   turnPhase: TurnPhase;
-  
-  // If it's my turn and I drew a card
   drawnCard: PublicCardView | null;
-  
-  // Wake up info
-  wakeUpCalledBy: string | null;
-  
-  // Pending effect (if I'm involved)
+  takeTwoCards: PublicCardView[] | null;
   pendingEffect: {
     type: EffectType;
-    awaitingSelection: 'own_slot' | 'other_slot' | 'confirm_swap' | null;
-    peekedCard: PublicCardView | null;  // Only if I'm the one peeking
+    awaitingSelection: 'any_slot' | 'second_slot' | null;
+    peekedCard: PublicCardView | null;
   } | null;
-  
-  // State version
   version: number;
 }
 
-// Room info for lobby display
 export interface RoomInfo {
   id: string;
   code: string;

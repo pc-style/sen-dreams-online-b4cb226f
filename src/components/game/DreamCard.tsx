@@ -1,11 +1,10 @@
 /**
- * Dream Card Component
- * Displays a card in a dream slot with proper visibility
+ * Dream Card - Compact dreamy design
  */
 
 import { cn } from '@/lib/utils';
 import { PublicDreamSlotView, CardDefinition } from '@/game/types';
-import { Moon, Eye, Bird } from 'lucide-react';
+import { Moon, Eye, Cat } from 'lucide-react';
 
 interface DreamCardProps {
   slot: PublicDreamSlotView;
@@ -14,7 +13,8 @@ interface DreamCardProps {
   isSelectable?: boolean;
   isSelected?: boolean;
   onClick?: () => void;
-  showInitialPeek?: boolean;  // For initial peek phase
+  showInitialPeek?: boolean;
+  compact?: boolean;
 }
 
 export function DreamCard({ 
@@ -25,9 +25,10 @@ export function DreamCard({
   isSelected = false,
   onClick,
   showInitialPeek = false,
+  compact = false,
 }: DreamCardProps) {
   const card = slot.card;
-  const isVisible = card?.visible !== null;
+  const isVisible = card?.visible !== null && card?.visible !== undefined;
   const canPeek = showInitialPeek && isOwn && (index === 0 || index === 3);
   const shouldShow = isVisible || canPeek;
   
@@ -36,77 +37,74 @@ export function DreamCard({
       onClick={onClick}
       disabled={!isSelectable && !onClick}
       className={cn(
-        "relative w-16 h-24 sm:w-20 sm:h-28 rounded-lg transition-all duration-300",
-        "flex flex-col items-center justify-center gap-1",
-        "border-2 shadow-md",
-        !slot.hasCard && "border-dashed border-muted-foreground/30 bg-muted/20",
-        slot.hasCard && !shouldShow && "bg-gradient-to-br from-primary/80 to-primary border-primary/60",
-        slot.hasCard && shouldShow && "bg-card border-border",
-        isSelectable && "cursor-pointer hover:scale-105 hover:shadow-lg hover:border-accent",
-        isSelected && "ring-2 ring-accent ring-offset-2 ring-offset-background scale-105",
+        "relative rounded-lg transition-all flex flex-col items-center justify-center",
+        "border shadow-md",
+        compact ? "w-12 h-16 sm:w-14 sm:h-20" : "w-14 h-20 sm:w-16 sm:h-24",
+        !slot.hasCard && "border-dashed border-purple-400/20 bg-slate-800/30",
+        slot.hasCard && !shouldShow && "bg-gradient-to-br from-purple-600 to-indigo-700 border-purple-400/30",
+        slot.hasCard && shouldShow && "bg-slate-800/80 border-purple-400/40",
+        isSelectable && "cursor-pointer hover:scale-105 hover:shadow-purple-500/30 hover:border-purple-300",
+        isSelected && "ring-2 ring-purple-400 scale-105",
         !isSelectable && !onClick && "cursor-default"
       )}
     >
       {!slot.hasCard ? (
-        <Moon className="w-6 h-6 text-muted-foreground/40" />
+        <Moon className="w-4 h-4 text-purple-400/30" />
       ) : shouldShow && card?.visible ? (
-        <CardFace definition={card.visible} />
+        <CardFace definition={card.visible} compact={compact} />
       ) : (
-        <div className="flex flex-col items-center text-primary-foreground">
-          <Moon className="w-8 h-8 opacity-60" />
-          <span className="text-xs mt-1 opacity-40">Dream</span>
+        <div className="flex flex-col items-center text-purple-200/60">
+          <Moon className={cn(compact ? "w-5 h-5" : "w-6 h-6")} />
+          <span className="text-[8px] mt-0.5 opacity-50">Dream</span>
         </div>
       )}
       
-      {/* Slot indicator */}
+      {/* Slot number */}
       <div className={cn(
-        "absolute -bottom-2 left-1/2 -translate-x-1/2",
-        "w-5 h-5 rounded-full text-xs font-medium",
+        "absolute -bottom-1.5 left-1/2 -translate-x-1/2",
+        "w-4 h-4 rounded-full text-[9px] font-medium",
         "flex items-center justify-center",
-        "bg-background border border-border shadow-sm"
+        "bg-slate-800 border border-purple-400/30 text-purple-200"
       )}>
         {index + 1}
       </div>
       
-      {/* Peek indicator for initial phase */}
+      {/* Peek indicator */}
       {canPeek && !slot.isRevealed && (
-        <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-accent flex items-center justify-center animate-pulse">
-          <Eye className="w-3 h-3 text-accent-foreground" />
+        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500/80 flex items-center justify-center animate-pulse">
+          <Eye className="w-2.5 h-2.5 text-white" />
         </div>
       )}
     </button>
   );
 }
 
-// Card face when visible
-function CardFace({ definition }: { definition: CardDefinition }) {
-  const getCrowColor = (value: number) => {
-    if (value <= 2) return 'text-emerald-600';
-    if (value <= 5) return 'text-amber-600';
-    return 'text-rose-600';
+function CardFace({ definition, compact }: { definition: CardDefinition; compact?: boolean }) {
+  const getColor = (value: number) => {
+    if (value <= 2) return 'text-emerald-400';
+    if (value <= 5) return 'text-amber-400';
+    return 'text-rose-400';
   };
   
-  const hasEffect = definition.effectType !== 'none';
-  
   return (
-    <div className="flex flex-col items-center text-center p-1">
+    <div className="flex flex-col items-center justify-center p-0.5">
       <div className={cn(
-        "text-2xl font-bold",
-        getCrowColor(definition.crowValue)
+        "font-bold",
+        getColor(definition.crowValue),
+        compact ? "text-lg" : "text-xl"
       )}>
         {definition.crowValue}
       </div>
-      <div className="flex items-center gap-0.5">
-        {Array.from({ length: Math.min(definition.crowValue, 5) }).map((_, i) => (
-          <Bird key={i} className={cn("w-2.5 h-2.5", getCrowColor(definition.crowValue))} />
+      <div className="flex gap-0.5">
+        {Array.from({ length: Math.min(definition.crowValue, 3) }).map((_, i) => (
+          <Cat key={i} className={cn("w-2 h-2", getColor(definition.crowValue))} />
         ))}
       </div>
-      <div className={cn(
-        "text-[8px] leading-tight mt-1 line-clamp-2",
-        hasEffect ? "text-accent-foreground font-medium" : "text-muted-foreground"
-      )}>
-        {definition.name}
-      </div>
+      {!compact && (
+        <div className="text-[7px] text-purple-300/60 mt-0.5 line-clamp-1">
+          {definition.name}
+        </div>
+      )}
     </div>
   );
 }
