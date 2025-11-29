@@ -36,6 +36,7 @@ export interface PlayerState {
   roundScore: number;
   totalScore: number;
   hasSeenInitialCards: boolean;
+  initialPeekedSlots: number[];
 }
 
 export type GamePhase = 
@@ -89,6 +90,7 @@ export type PlayerAction =
   | { type: 'SELECT_SLOT'; targetPlayerId: string; slotIndex: number }
   | { type: 'CANCEL_EFFECT' }
   | { type: 'ACKNOWLEDGE_INITIAL_PEEK' }
+  | { type: 'REVEAL_INITIAL_CARD'; slotIndex: number }
   | { type: 'CHOOSE_TAKE_TWO_CARD'; cardIndex: number };
 
 export interface PublicCardView {
@@ -122,6 +124,7 @@ export interface PlayerGameView {
   myTotalScore: number;
   myRoundScore: number;
   hasSeenInitialCards: boolean;
+  initialPeekedSlots: number[];
   players: PublicPlayerView[];
   deckCount: number;
   topDiscard: PublicCardView | null;
