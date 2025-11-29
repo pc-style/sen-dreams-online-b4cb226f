@@ -52,9 +52,6 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
     }
   };
   
-  const drawnCardHasEffect = gameView.drawnCard?.visible?.effectType !== 'none' && 
-                             gameView.drawnCard?.visible?.effectType !== undefined;
-  
   // Handle initial peek card selection
   const handlePeekSlotClick = (index: number) => {
     if (peekedSlots.includes(index)) {
@@ -187,7 +184,8 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
           onUseEffect={() => onAction({ type: 'USE_CARD_EFFECT' })}
           onDeclareWakeUp={() => onAction({ type: 'DECLARE_WAKE_UP' })}
           onChooseTakeTwo={(idx) => onAction({ type: 'CHOOSE_TAKE_TWO_CARD', cardIndex: idx })}
-          hasEffect={drawnCardHasEffect}
+          canDiscard={gameView.canDiscard}
+          canUseEffect={gameView.canUseEffect}
         />
         
         {/* My panel */}

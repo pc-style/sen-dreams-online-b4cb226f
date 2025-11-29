@@ -63,6 +63,7 @@ export interface GameState {
   activePlayerIndex: number;
   turnPhase: TurnPhase;
   drawnCard: CardInstance | null;
+  drawnFromDeck: boolean; // Track if card was drawn from deck (for special effects)
   takeTwoCards: CardInstance[] | null;
   pendingEffect: PendingEffect | null;
   targetScore: number;
@@ -128,6 +129,8 @@ export interface PlayerGameView {
   isMyTurn: boolean;
   turnPhase: TurnPhase;
   drawnCard: PublicCardView | null;
+  canDiscard: boolean; // Per rules: only if drawn from deck
+  canUseEffect: boolean; // Per rules: only if drawn from deck AND has effect
   takeTwoCards: PublicCardView[] | null;
   pendingEffect: {
     type: EffectType;

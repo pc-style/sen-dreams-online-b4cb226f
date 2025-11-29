@@ -59,6 +59,7 @@ export function createInitialGameState(
     activePlayerIndex: 0,
     turnPhase: 'draw',
     drawnCard: null,
+    drawnFromDeck: false,
     takeTwoCards: null,
     pendingEffect: null,
     targetScore,
@@ -92,16 +93,20 @@ export function isActionValid(state: GameState, playerId: string, action: Player
              action.slotIndex < 4;
              
     case 'DISCARD_DRAWN_CARD':
-      return isActivePlayer && 
-             state.phase === 'playing' && 
-             state.turnPhase === 'action' && 
-             state.drawnCard !== null;
-             
-    case 'USE_CARD_EFFECT':
+      // Per rules: Can only discard if drawn from deck (not from discard pile)
       return isActivePlayer && 
              state.phase === 'playing' && 
              state.turnPhase === 'action' && 
              state.drawnCard !== null &&
+             state.drawnFromDeck;
+             
+    case 'USE_CARD_EFFECT':
+      // Per rules: Special powers can ONLY be activated if drawn from DECK
+      return isActivePlayer && 
+             state.phase === 'playing' && 
+             state.turnPhase === 'action' && 
+             state.drawnCard !== null &&
+             state.drawnFromDeck &&
              hasEffect(state.drawnCard);
              
     case 'DECLARE_WAKE_UP':
@@ -154,12 +159,14 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
       
     case 'DRAW_FROM_DECK':
       newState.drawnCard = newState.deck.pop()!;
+      newState.drawnFromDeck = true;
       newState.turnPhase = 'action';
       break;
       
     case 'DRAW_FROM_DISCARD':
-      // Per rules: Drawing from discard = MUST swap
+      // Per rules: Drawing from discard = MUST swap (cannot discard or use effect)
       newState.drawnCard = newState.discard.pop()!;
+      newState.drawnFromDeck = false;
       newState.turnPhase = 'action';
       break;
       
@@ -279,6 +286,7 @@ function performSwap(state: GameState, slots: { playerId: string; slotIndex: num
 function endTurn(state: GameState) {
   state.turnPhase = 'draw';
   state.drawnCard = null;
+  state.drawnFromDeck = false;
   state.pendingEffect = null;
   state.takeTwoCards = null;
   
@@ -352,6 +360,7 @@ export function startNewRound(state: GameState): GameState {
   newState.activePlayerIndex = 0;
   newState.turnPhase = 'draw';
   newState.drawnCard = null;
+  newState.drawnFromDeck = false;
   newState.takeTwoCards = null;
   newState.pendingEffect = null;
   newState.wakeUpCallerId = null;
@@ -433,6 +442,10 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
     }));
   }
   
+  // Per rules: can only discard/use effect if drawn from deck
+  const canDiscard = isActivePlayer && state.drawnFromDeck && state.drawnCard !== null;
+  const canUseEffect = canDiscard && hasEffect(state.drawnCard!);
+  
   return {
     roomId: state.roomId,
     phase: state.phase,
@@ -455,6 +468,8 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
       instanceId: state.drawnCard.instanceId,
       visible: getCardDefinition(state.drawnCard.definitionId) ?? null,
     } : null,
+    canDiscard,
+    canUseEffect,
     takeTwoCards: takeTwoCardsView,
     pendingEffect: pendingEffectView,
     version: state.version,
