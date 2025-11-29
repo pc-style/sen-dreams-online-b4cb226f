@@ -377,7 +377,13 @@ export function useGameState(roomId: string | null, playerId: string) {
       }, () => {
         refreshState();
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIPTION_ERROR') {
+          setError('Lost connection to game server. Please refresh the page.');
+        } else if (status === 'TIMED_OUT') {
+          setError('Connection timed out. Please check your internet connection.');
+        }
+      });
     
     return () => {
       supabase.removeChannel(channel);
@@ -408,17 +414,26 @@ export function useGameState(roomId: string | null, playerId: string) {
       
       const newState = applyAction(currentState, playerId, action);
       
-      // Update state in database
-      const { error: updateError } = await supabase
+      // Update state in database with optimistic concurrency control
+      const { data: updateResult, error: updateError } = await supabase
         .from('game_states')
         .update({ 
           state: newState as any,
           version: newState.version,
         })
         .eq('room_id', roomId)
-        .eq('version', data.version);
+        .eq('version', data.version)
+        .select();
       
       if (updateError) throw updateError;
+      
+      // Version conflict - no rows updated, another player acted first
+      if (!updateResult || updateResult.length === 0) {
+        console.warn('Version conflict - action not applied. Another player may have acted first.');
+        // Refresh state to get latest version
+        await refreshState();
+        return false;
+      }
       
       // Update local view immediately
       setGameView(derivePlayerView(newState, playerId));

@@ -195,13 +195,21 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
         newState.drawnCard = null;
         
         if (effectType === 'take_two') {
-          // Draw 2 cards
+          // Draw 2 cards from deck
           const card1 = newState.deck.pop();
           const card2 = newState.deck.pop();
+          
           if (card1 && card2) {
+            // Normal case: both cards drawn successfully
             newState.takeTwoCards = [card1, card2];
             newState.turnPhase = 'take_two_choose';
+          } else if (card1) {
+            // Edge case: only 1 card available in deck, auto-keep it
+            newState.drawnCard = card1;
+            newState.drawnFromDeck = true;
+            newState.turnPhase = 'action';
           } else {
+            // No cards available: effect wasted, end turn
             endTurn(newState);
           }
         } else {
@@ -292,12 +300,15 @@ function endTurn(state: GameState) {
   
   state.activePlayerIndex = (state.activePlayerIndex + 1) % state.players.length;
   
-  // Reshuffle if needed
+  // Reshuffle discard pile into deck if deck is empty
   if (state.deck.length === 0 && state.discard.length > 1) {
+    // Keep top discard card visible
     const topDiscard = state.discard.pop()!;
     state.deck = shuffleArray(state.discard);
     state.discard = [topDiscard];
   }
+  // Edge case: if both deck and discard are nearly empty, game can continue
+  // Players will draw from what's available or end via POBUDKA
 }
 
 function endRound(state: GameState) {
