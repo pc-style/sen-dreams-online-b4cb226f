@@ -27,7 +27,7 @@ export function ScoreBoard({
   const gameWinner = isGameOver ? sortedByTotal[0] : null;
   
   return (
-    <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+    <div className="min-h-screen-safe bg-background p-4 flex items-center justify-center">
       <div className="max-w-md w-full animate-fade-in">
         {/* Header */}
         <div className="text-center mb-6">

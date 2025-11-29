@@ -45,12 +45,12 @@ export function CentralArea({
   const showTakeTwoOptions = isMyTurn && turnPhase === 'take_two_choose' && takeTwoCards;
   
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-3">
+    <div className="h-full flex flex-col items-center justify-center gap-2 sm:gap-3">
       {/* Turn indicator - always reserve space */}
-      <div className="h-12 flex flex-col items-center justify-center shrink-0">
+      <div className="h-10 sm:h-12 flex flex-col items-center justify-center shrink-0">
         {isMyTurn && turnPhase === 'draw' && (
           <>
-            <h2 className="text-foreground font-bold text-base">Your Turn</h2>
+            <h2 className="text-foreground font-bold text-sm sm:text-base">Your Turn</h2>
             <p className="text-xs text-muted-foreground">Draw a card or declare Pobudka!</p>
           </>
         )}
@@ -62,7 +62,7 @@ export function CentralArea({
       </div>
       
       {/* Main card area - deck/discard OR drawn card */}
-      <div className="flex items-center justify-center gap-4 shrink-0">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 shrink-0">
         {/* Show deck/discard when in draw phase or no drawn card */}
         {(!drawnCard || showTakeTwoOptions) && (
           <>
@@ -72,7 +72,7 @@ export function CentralArea({
               disabled={!showDrawOptions || deckCount === 0}
               aria-label={`Draw from deck, ${deckCount} cards remaining`}
               className={cn(
-                "relative w-[72px] h-[108px] sm:w-[88px] sm:h-[132px]",
+                "relative w-[60px] h-[90px] sm:w-[72px] sm:h-[108px] md:w-[88px] md:h-[132px]",
                 "rounded-lg transition-all duration-150",
                 "border-2 shadow-card overflow-hidden",
                 showDrawOptions && deckCount > 0 && [
@@ -97,7 +97,7 @@ export function CentralArea({
               disabled={!showDrawOptions || !topDiscard}
               aria-label={`Draw from discard pile${topDiscard?.visible ? `, top card is ${topDiscard.visible.crowValue}` : ''}`}
               className={cn(
-                "relative w-[72px] h-[108px] sm:w-[88px] sm:h-[132px]",
+                "relative w-[60px] h-[90px] sm:w-[72px] sm:h-[108px] md:w-[88px] md:h-[132px]",
                 "rounded-lg transition-all duration-150",
                 "border-2 shadow-card",
                 topDiscard 
@@ -122,7 +122,7 @@ export function CentralArea({
         {/* Drawn card - replaces deck/discard view */}
         {drawnCard && !showTakeTwoOptions && (
           <div className={cn(
-            "w-[88px] h-[132px] sm:w-[104px] sm:h-[156px]",
+            "w-[70px] h-[105px] sm:w-[88px] sm:h-[132px] md:w-[104px] md:h-[156px]",
             "rounded-lg bg-card border-2 border-primary/50",
             "shadow-lg flex items-center justify-center"
           )}>
@@ -132,13 +132,13 @@ export function CentralArea({
         
         {/* Take Two cards */}
         {showTakeTwoOptions && takeTwoCards && (
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             {takeTwoCards.map((card, idx) => (
               <button
                 key={idx}
                 onClick={() => onChooseTakeTwo(idx)}
                 className={cn(
-                  "w-[72px] h-[108px] sm:w-[88px] sm:h-[132px] rounded-lg",
+                  "w-[60px] h-[90px] sm:w-[72px] sm:h-[108px] md:w-[88px] md:h-[132px] rounded-lg",
                   "bg-card border-2 border-border",
                   "hover:border-primary hover:scale-[1.02] hover:shadow-card-hover",
                   "transition-all duration-150"
@@ -152,7 +152,7 @@ export function CentralArea({
       </div>
       
       {/* Action buttons - always reserve space */}
-      <div className="h-20 flex flex-col items-center justify-center gap-2 shrink-0">
+      <div className="h-16 sm:h-20 flex flex-col items-center justify-center gap-2 shrink-0">
         {/* Pobudka button */}
         {isMyTurn && turnPhase === 'draw' && (
           <Button

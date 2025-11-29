@@ -34,11 +34,11 @@ export function DreamCard({
   const isVisible = card?.visible !== null && card?.visible !== undefined;
   const shouldShow = showInitialPeek ? isPeekedDuringSetup : isVisible;
   
-  // 2:3 aspect ratio card sizes
+  // 2:3 aspect ratio card sizes - optimized for mobile
   const sizeClasses = {
-    sm: 'w-[70px] h-[105px] sm:w-[80px] sm:h-[120px]',
-    md: 'w-[90px] h-[135px] sm:w-[104px] sm:h-[156px]',
-    lg: 'w-[110px] h-[165px] sm:w-[128px] sm:h-[192px]',
+    sm: 'w-[60px] h-[90px] sm:w-[70px] sm:h-[105px] md:w-[80px] md:h-[120px]',
+    md: 'w-[70px] h-[105px] sm:w-[84px] sm:h-[126px] md:w-[96px] md:h-[144px]',
+    lg: 'w-[90px] h-[135px] sm:w-[110px] sm:h-[165px] md:w-[128px] md:h-[192px]',
   };
   
   return (
