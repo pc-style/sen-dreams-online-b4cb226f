@@ -14,7 +14,112 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      game_players: {
+        Row: {
+          id: string
+          is_connected: boolean
+          joined_at: string
+          player_id: string
+          player_name: string
+          room_id: string
+          seat_index: number
+          total_score: number
+        }
+        Insert: {
+          id?: string
+          is_connected?: boolean
+          joined_at?: string
+          player_id: string
+          player_name: string
+          room_id: string
+          seat_index: number
+          total_score?: number
+        }
+        Update: {
+          id?: string
+          is_connected?: boolean
+          joined_at?: string
+          player_id?: string
+          player_name?: string
+          room_id?: string
+          seat_index?: number
+          total_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_players_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "game_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_rooms: {
+        Row: {
+          code: string
+          created_at: string
+          host_id: string
+          id: string
+          max_players: number
+          status: string
+          target_score: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          host_id: string
+          id?: string
+          max_players?: number
+          status?: string
+          target_score?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          host_id?: string
+          id?: string
+          max_players?: number
+          status?: string
+          target_score?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      game_states: {
+        Row: {
+          id: string
+          room_id: string
+          state: Json
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          id?: string
+          room_id: string
+          state: Json
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          id?: string
+          room_id?: string
+          state?: Json
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_states_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: true
+            referencedRelation: "game_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
