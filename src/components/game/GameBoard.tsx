@@ -1,5 +1,5 @@
 /**
- * Main Game Board Component - Accessible, responsive design
+ * Main Game Board - Clean, neutral design
  */
 
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { CentralArea } from './CentralArea';
 import { ScoreBoard } from './ScoreBoard';
 import { EffectModal } from './EffectModal';
 import { Button } from '@/components/ui/button';
-import { Eye, ArrowRight, Moon, Star } from 'lucide-react';
+import { Eye, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GameBoardProps {
@@ -66,23 +66,26 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
   // Initial peek phase
   if (gameView.phase === 'initial_peek') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 p-4 sm:p-6 relative overflow-hidden">
-        <Stars />
-        <div className="max-w-2xl mx-auto relative z-10">
-          <div className="text-center mb-8 sm:mb-10">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-purple-500/30 flex items-center justify-center border-2 border-purple-400/40 mb-4 shadow-xl shadow-purple-500/30">
-              <Eye className="w-8 h-8 sm:w-10 sm:h-10 text-purple-200" />
+      <div className="min-h-screen bg-background p-4 sm:p-6">
+        <div className="max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8 sm:mb-10 animate-fade-in">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 mb-4">
+              <Eye className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-purple-100 mb-2">Choose 2 Cards to Peek</h1>
-            <p className="text-base sm:text-lg text-purple-300/80">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              Choose 2 Cards to Peek
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground">
               {peekedSlots.length < 2 
                 ? `Tap ${2 - peekedSlots.length} more card${peekedSlots.length === 1 ? '' : 's'} to memorize`
                 : 'Memorize these values, then confirm!'}
             </p>
           </div>
           
+          {/* Player cards */}
           {myPlayer && (
-            <div className="mb-8 sm:mb-10">
+            <div className="mb-8 sm:mb-10 animate-slide-up">
               <PlayerPanel
                 player={myPlayer}
                 isMe={true}
@@ -96,20 +99,21 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
             </div>
           )}
           
+          {/* Confirm button */}
           {!gameView.hasSeenInitialCards ? (
             <div className="text-center">
               <Button
                 onClick={handleAcknowledgePeek}
                 disabled={peekedSlots.length !== 2}
                 size="lg"
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white disabled:opacity-50 font-bold text-base sm:text-lg px-8 py-4"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base sm:text-lg px-8 py-4"
               >
                 I've memorized them
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           ) : (
-            <div className="text-center text-purple-300/70 animate-pulse text-base sm:text-lg">
+            <div className="text-center text-muted-foreground animate-pulse-soft text-base sm:text-lg">
               Waiting for other players...
             </div>
           )}
@@ -133,25 +137,22 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
   
   // Main game
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 flex flex-col relative overflow-hidden">
-      <Stars />
-      
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-3 sm:p-4 md:p-6 relative z-10">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
-          <div className="flex items-center gap-2 sm:gap-3 text-purple-200">
-            <Moon className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="text-base sm:text-lg font-bold">Round {gameView.roundNumber}</span>
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-3 sm:p-4 md:p-6">
+        {/* Header - minimal */}
+        <header className="flex items-center justify-between mb-4 sm:mb-6 px-1">
+          <div className="flex items-center gap-2 text-foreground">
+            <span className="text-sm sm:text-base font-semibold">Round {gameView.roundNumber}</span>
           </div>
-          <div className="text-sm sm:text-base text-purple-300/70 font-medium">
-            {gameView.deckCount} cards left
+          <div className="text-sm text-muted-foreground font-medium">
+            {gameView.deckCount} cards
           </div>
-        </div>
+        </header>
         
-        {/* Opponents */}
+        {/* Opponents - compact */}
         <div className={cn(
           "grid gap-3 sm:gap-4 mb-4 sm:mb-6",
-          otherPlayers.length === 1 && "grid-cols-1 max-w-xl mx-auto w-full",
+          otherPlayers.length === 1 && "grid-cols-1 max-w-lg mx-auto w-full",
           otherPlayers.length >= 2 && "grid-cols-1 sm:grid-cols-2"
         )}>
           {otherPlayers.map(player => (
@@ -166,7 +167,7 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
           ))}
         </div>
         
-        {/* Central area */}
+        {/* Central play area */}
         <CentralArea
           deckCount={gameView.deckCount}
           topDiscard={gameView.topDiscard}
@@ -184,7 +185,7 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
           canUseEffect={gameView.canUseEffect}
         />
         
-        {/* My panel */}
+        {/* My panel - prominent */}
         {myPlayer && (
           <div className="mt-auto pt-4 sm:pt-6">
             <PlayerPanel
@@ -206,19 +207,6 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
           />
         )}
       </div>
-    </div>
-  );
-}
-
-function Stars() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <Star className="absolute top-20 left-[8%] w-3 h-3 text-yellow-200/30 animate-pulse" />
-      <Star className="absolute top-28 right-[12%] w-2 h-2 text-yellow-200/25 animate-pulse" style={{ animationDelay: '0.5s' }} />
-      <Star className="absolute top-40 left-[25%] w-2 h-2 text-purple-300/30 animate-pulse" style={{ animationDelay: '1s' }} />
-      <Star className="absolute bottom-32 right-[18%] w-3 h-3 text-purple-300/25 animate-pulse" style={{ animationDelay: '0.7s' }} />
-      <Star className="absolute top-1/3 left-[5%] w-2 h-2 text-yellow-200/20 animate-pulse" style={{ animationDelay: '1.2s' }} />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl" />
     </div>
   );
 }
