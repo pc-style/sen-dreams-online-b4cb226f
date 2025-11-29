@@ -68,9 +68,9 @@ export default function Index() {
         });
         return;
       }
-      
-      await joinRoom(room.id, playerId, playerName);
-      navigate(`/lobby/${room.id}`);
+
+      await joinRoom(room._id, playerId, playerName);
+      navigate(`/lobby/${room._id}`);
     } else {
       toast({
         title: 'Room not found',
