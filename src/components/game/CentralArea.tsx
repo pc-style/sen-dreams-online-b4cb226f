@@ -51,11 +51,11 @@ export function CentralArea({
         {isMyTurn && turnPhase === 'draw' && (
           <>
             <h2 className="text-foreground font-bold text-sm sm:text-base">Your Turn</h2>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Draw a card or declare Pobudka!</p>
+            <p className="text-xs text-muted-foreground">Draw a card or declare Pobudka!</p>
           </>
         )}
         {showActionOptions && (
-          <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center">
             {canDiscard ? 'Discard, use effect, or tap a slot to swap' : 'Tap a dream slot to swap'}
           </p>
         )}
@@ -193,7 +193,7 @@ export function CentralArea({
         )}
         
         {showTakeTwoOptions && (
-          <p className="text-[10px] sm:text-xs text-muted-foreground">Choose one card to keep</p>
+          <p className="text-xs text-muted-foreground">Choose one card to keep</p>
         )}
       </div>
     </div>
