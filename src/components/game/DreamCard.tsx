@@ -57,12 +57,11 @@ export function DreamCard({
         slot.hasCard && !shouldShow && "bg-card border-border",
         // Face up
         slot.hasCard && shouldShow && "bg-card border-border",
-        // Selectable state
+        // Selectable state - subtle highlight
         isSelectable && [
           "cursor-pointer",
           "hover:scale-105 hover:shadow-card-hover hover:-translate-y-1",
-          "ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
-          "animate-pulse-glow"
+          "ring-2 ring-primary/60 ring-offset-2 ring-offset-background"
         ],
         // Selected state
         isSelected && "ring-2 ring-primary scale-105 shadow-card-active",
@@ -100,7 +99,7 @@ export function DreamCard({
       
       {/* Peek indicator during setup - tap to peek */}
       {showInitialPeek && !isPeekedDuringSetup && (
-        <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center animate-pulse-glow">
+        <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
           <Eye className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
       )}
