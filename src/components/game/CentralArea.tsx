@@ -1,25 +1,25 @@
 /**
- * Central Game Area Component
- * Deck, discard pile, and drawn card display
+ * Central Game Area - Compact dreamy design
  */
 
 import { cn } from '@/lib/utils';
 import { PublicCardView, TurnPhase, CardDefinition } from '@/game/types';
 import { Button } from '@/components/ui/button';
-import { Moon, Bird, Sparkles, ArrowDown } from 'lucide-react';
+import { Moon, Cat, Sparkles } from 'lucide-react';
 
 interface CentralAreaProps {
   deckCount: number;
   topDiscard: PublicCardView | null;
   drawnCard: PublicCardView | null;
+  takeTwoCards: PublicCardView[] | null;
   isMyTurn: boolean;
   turnPhase: TurnPhase;
-  canDeclareWakeUp: boolean;
   onDrawFromDeck: () => void;
   onDrawFromDiscard: () => void;
   onDiscard: () => void;
   onUseEffect: () => void;
   onDeclareWakeUp: () => void;
+  onChooseTakeTwo: (index: number) => void;
   hasEffect: boolean;
 }
 
@@ -27,124 +27,138 @@ export function CentralArea({
   deckCount,
   topDiscard,
   drawnCard,
+  takeTwoCards,
   isMyTurn,
   turnPhase,
-  canDeclareWakeUp,
   onDrawFromDeck,
   onDrawFromDiscard,
   onDiscard,
   onUseEffect,
   onDeclareWakeUp,
+  onChooseTakeTwo,
   hasEffect,
 }: CentralAreaProps) {
   const showDrawOptions = isMyTurn && turnPhase === 'draw';
   const showActionOptions = isMyTurn && turnPhase === 'action' && drawnCard;
+  const showTakeTwoOptions = isMyTurn && turnPhase === 'take_two_choose' && takeTwoCards;
   
   return (
-    <div className="flex flex-col items-center gap-6 py-6">
+    <div className="flex-1 flex flex-col items-center justify-center gap-3 py-2">
       {/* Turn indicator */}
-      {isMyTurn && (
-        <div className="text-center animate-pulse">
-          <span className="text-accent font-medium">Your Turn</span>
-          <p className="text-sm text-muted-foreground">
-            {turnPhase === 'draw' && "Draw a card from the deck or discard pile"}
-            {turnPhase === 'action' && "Replace a dream card or discard"}
-            {turnPhase === 'effect' && "Complete the card effect"}
-          </p>
+      {isMyTurn && turnPhase === 'draw' && (
+        <div className="text-center">
+          <span className="text-purple-300 font-medium text-sm">Your Turn</span>
+          <p className="text-xs text-purple-400/60">Draw a card or call Pobudka!</p>
         </div>
       )}
       
       {/* Wake up button */}
-      {isMyTurn && canDeclareWakeUp && turnPhase === 'draw' && (
+      {isMyTurn && turnPhase === 'draw' && (
         <Button
           onClick={onDeclareWakeUp}
           variant="outline"
-          className="border-amber-500 text-amber-600 hover:bg-amber-500/10"
+          size="sm"
+          className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 bg-transparent"
         >
-          <Sparkles className="w-4 h-4 mr-2" />
-          Declare Pobudka!
+          <Sparkles className="w-3 h-3 mr-1.5" />
+          Pobudka!
         </Button>
       )}
       
       {/* Deck and Discard */}
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-4">
         {/* Deck */}
-        <div className="flex flex-col items-center gap-2">
-          <button
-            onClick={onDrawFromDeck}
-            disabled={!showDrawOptions || deckCount === 0}
-            className={cn(
-              "relative w-20 h-28 sm:w-24 sm:h-32 rounded-lg transition-all duration-300",
-              "bg-gradient-to-br from-primary to-primary/80 border-2 border-primary/60",
-              "flex flex-col items-center justify-center",
-              "shadow-lg",
-              showDrawOptions && deckCount > 0 && "cursor-pointer hover:scale-105 hover:shadow-xl hover:border-accent",
-              (!showDrawOptions || deckCount === 0) && "opacity-60 cursor-not-allowed"
-            )}
-          >
-            <Moon className="w-10 h-10 text-primary-foreground opacity-60" />
-            <span className="text-primary-foreground text-xs mt-2 opacity-60">Deck</span>
-            
-            {/* Card count badge */}
-            <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold shadow">
-              {deckCount}
-            </div>
-          </button>
-          <span className="text-xs text-muted-foreground">Draw Deck</span>
-        </div>
+        <button
+          onClick={onDrawFromDeck}
+          disabled={!showDrawOptions || deckCount === 0}
+          className={cn(
+            "relative w-14 h-20 sm:w-16 sm:h-24 rounded-lg transition-all",
+            "bg-gradient-to-br from-purple-600 to-indigo-700 border border-purple-400/30",
+            "flex flex-col items-center justify-center",
+            "shadow-lg shadow-purple-900/50",
+            showDrawOptions && deckCount > 0 && "cursor-pointer hover:scale-105 hover:shadow-purple-500/30",
+            (!showDrawOptions || deckCount === 0) && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          <Moon className="w-6 h-6 text-purple-200/60" />
+          <span className="text-purple-200/50 text-[10px] mt-1">Deck</span>
+          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-800 border border-purple-400/30 flex items-center justify-center text-[10px] font-bold text-purple-200">
+            {deckCount}
+          </div>
+        </button>
         
-        {/* Discard Pile */}
-        <div className="flex flex-col items-center gap-2">
-          <button
-            onClick={onDrawFromDiscard}
-            disabled={!showDrawOptions || !topDiscard}
-            className={cn(
-              "relative w-20 h-28 sm:w-24 sm:h-32 rounded-lg transition-all duration-300",
-              "border-2 shadow-lg",
-              topDiscard ? "bg-card border-border" : "bg-muted/50 border-dashed border-muted-foreground/30",
-              showDrawOptions && topDiscard && "cursor-pointer hover:scale-105 hover:shadow-xl hover:border-accent",
-              (!showDrawOptions || !topDiscard) && "opacity-60 cursor-not-allowed"
-            )}
-          >
-            {topDiscard?.visible ? (
-              <DiscardCardFace definition={topDiscard.visible} />
-            ) : (
-              <span className="text-muted-foreground text-xs">Empty</span>
-            )}
-          </button>
-          <span className="text-xs text-muted-foreground">Discard Pile</span>
-        </div>
+        {/* Discard */}
+        <button
+          onClick={onDrawFromDiscard}
+          disabled={!showDrawOptions || !topDiscard}
+          className={cn(
+            "relative w-14 h-20 sm:w-16 sm:h-24 rounded-lg transition-all",
+            "border shadow-lg",
+            topDiscard ? "bg-slate-800/80 border-purple-400/30" : "bg-slate-800/40 border-dashed border-purple-400/20",
+            showDrawOptions && topDiscard && "cursor-pointer hover:scale-105",
+            (!showDrawOptions || !topDiscard) && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          {topDiscard?.visible ? (
+            <MiniCardFace definition={topDiscard.visible} />
+          ) : (
+            <span className="text-purple-300/30 text-[10px]">Empty</span>
+          )}
+        </button>
       </div>
       
-      {/* Drawn card display */}
-      {drawnCard && (
-        <div className="flex flex-col items-center gap-3 mt-4 animate-in slide-in-from-top duration-300">
-          <ArrowDown className="w-5 h-5 text-muted-foreground animate-bounce" />
-          <div className="text-sm font-medium text-muted-foreground">You drew:</div>
-          <div className={cn(
-            "w-24 h-32 sm:w-28 sm:h-36 rounded-lg",
-            "bg-card border-2 border-accent shadow-xl",
-            "flex items-center justify-center"
-          )}>
-            {drawnCard.visible && <DrawnCardFace definition={drawnCard.visible} />}
+      {/* Take Two choice */}
+      {showTakeTwoOptions && takeTwoCards && (
+        <div className="flex flex-col items-center gap-2 animate-in fade-in">
+          <span className="text-xs text-purple-300">Choose one to keep:</span>
+          <div className="flex gap-3">
+            {takeTwoCards.map((card, idx) => (
+              <button
+                key={idx}
+                onClick={() => onChooseTakeTwo(idx)}
+                className="w-14 h-20 sm:w-16 sm:h-24 rounded-lg bg-slate-800/80 border-2 border-purple-400/50 hover:border-purple-300 hover:scale-105 transition-all"
+              >
+                {card.visible && <MiniCardFace definition={card.visible} />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Drawn card */}
+      {drawnCard && !showTakeTwoOptions && (
+        <div className="flex flex-col items-center gap-2 animate-in slide-in-from-top-4">
+          <span className="text-xs text-purple-300/70">You drew:</span>
+          <div className="w-16 h-24 sm:w-20 sm:h-28 rounded-lg bg-slate-800/80 border-2 border-purple-400/50 shadow-lg shadow-purple-500/20 flex items-center justify-center">
+            {drawnCard.visible && <CardFace definition={drawnCard.visible} />}
           </div>
           
-          {/* Action buttons */}
           {showActionOptions && (
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-              <Button onClick={onDiscard} variant="outline" size="sm">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button 
+                onClick={onDiscard} 
+                variant="outline" 
+                size="sm"
+                className="bg-transparent border-purple-400/30 text-purple-200 hover:bg-purple-500/10 text-xs h-7"
+              >
                 Discard
               </Button>
               {hasEffect && (
-                <Button onClick={onUseEffect} variant="secondary" size="sm">
+                <Button 
+                  onClick={onUseEffect} 
+                  size="sm"
+                  className="bg-purple-600/80 hover:bg-purple-500 text-white text-xs h-7"
+                >
                   <Sparkles className="w-3 h-3 mr-1" />
                   Use Effect
                 </Button>
               )}
-              <div className="w-full text-center text-xs text-muted-foreground mt-1">
-                Or click a dream slot to replace it
-              </div>
             </div>
+          )}
+          {showActionOptions && (
+            <p className="text-[10px] text-purple-400/50 text-center">
+              Or tap a dream slot to replace
+            </p>
           )}
         </div>
       )}
@@ -152,57 +166,57 @@ export function CentralArea({
   );
 }
 
-function DiscardCardFace({ definition }: { definition: CardDefinition }) {
-  const getCrowColor = (value: number) => {
-    if (value <= 2) return 'text-emerald-600';
-    if (value <= 5) return 'text-amber-600';
-    return 'text-rose-600';
+function MiniCardFace({ definition }: { definition: CardDefinition }) {
+  const getColor = (value: number) => {
+    if (value <= 2) return 'text-emerald-400';
+    if (value <= 5) return 'text-amber-400';
+    return 'text-rose-400';
   };
   
   return (
-    <div className="flex flex-col items-center text-center p-2">
-      <div className={cn("text-3xl font-bold", getCrowColor(definition.crowValue))}>
+    <div className="flex flex-col items-center justify-center h-full p-1">
+      <div className={cn("text-xl sm:text-2xl font-bold", getColor(definition.crowValue))}>
         {definition.crowValue}
       </div>
-      <div className="flex items-center gap-0.5 mt-1">
-        {Array.from({ length: Math.min(definition.crowValue, 5) }).map((_, i) => (
-          <Bird key={i} className={cn("w-3 h-3", getCrowColor(definition.crowValue))} />
+      <div className="flex gap-0.5">
+        {Array.from({ length: Math.min(definition.crowValue, 3) }).map((_, i) => (
+          <Cat key={i} className={cn("w-2 h-2", getColor(definition.crowValue))} />
         ))}
       </div>
-      <div className="text-xs text-muted-foreground mt-2 line-clamp-2">
+      <div className="text-[8px] text-purple-300/60 mt-0.5 line-clamp-1">
         {definition.name}
       </div>
     </div>
   );
 }
 
-function DrawnCardFace({ definition }: { definition: CardDefinition }) {
-  const getCrowColor = (value: number) => {
-    if (value <= 2) return 'text-emerald-600';
-    if (value <= 5) return 'text-amber-600';
-    return 'text-rose-600';
+function CardFace({ definition }: { definition: CardDefinition }) {
+  const getColor = (value: number) => {
+    if (value <= 2) return 'text-emerald-400';
+    if (value <= 5) return 'text-amber-400';
+    return 'text-rose-400';
   };
   
   const hasEffect = definition.effectType !== 'none';
   
   return (
-    <div className="flex flex-col items-center text-center p-2">
-      <div className={cn("text-4xl font-bold", getCrowColor(definition.crowValue))}>
+    <div className="flex flex-col items-center justify-center h-full p-1.5">
+      <div className={cn("text-2xl sm:text-3xl font-bold", getColor(definition.crowValue))}>
         {definition.crowValue}
       </div>
-      <div className="flex items-center gap-0.5 mt-1">
-        {Array.from({ length: Math.min(definition.crowValue, 5) }).map((_, i) => (
-          <Bird key={i} className={cn("w-3 h-3", getCrowColor(definition.crowValue))} />
+      <div className="flex gap-0.5 mt-0.5">
+        {Array.from({ length: Math.min(definition.crowValue, 4) }).map((_, i) => (
+          <Cat key={i} className={cn("w-2.5 h-2.5", getColor(definition.crowValue))} />
         ))}
       </div>
       <div className={cn(
-        "text-sm mt-2",
-        hasEffect ? "text-accent-foreground font-medium" : "text-muted-foreground"
+        "text-[9px] mt-1 text-center",
+        hasEffect ? "text-purple-300 font-medium" : "text-purple-300/60"
       )}>
         {definition.name}
       </div>
       {hasEffect && (
-        <div className="text-xs text-muted-foreground mt-1 px-2">
+        <div className="text-[8px] text-purple-400/50 text-center px-1">
           {definition.description}
         </div>
       )}

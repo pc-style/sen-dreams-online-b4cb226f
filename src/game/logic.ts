@@ -1,6 +1,6 @@
 /**
  * Sen Card Game - Pure Game Logic Functions
- * All game rules are implemented here as pure functions
+ * Implementing official rules
  */
 
 import { 
@@ -10,10 +10,7 @@ import {
   PlayerGameView,
   PublicPlayerView,
   PublicDreamSlotView,
-  PublicCardView,
   DreamSlot,
-  PendingEffect,
-  CardInstance
 } from './types';
 import { 
   createDeck, 
@@ -24,7 +21,6 @@ import {
   getEffectType 
 } from './cards';
 
-// Initial game state
 export function createInitialGameState(
   roomId: string, 
   players: { playerId: string; playerName: string }[],
@@ -32,7 +28,6 @@ export function createInitialGameState(
 ): GameState {
   const deck = shuffleArray(createDeck());
   
-  // Deal 4 cards to each player
   const playerStates: PlayerState[] = players.map((p, index) => {
     const dreamSlots: DreamSlot[] = [];
     for (let i = 0; i < 4; i++) {
@@ -52,7 +47,6 @@ export function createInitialGameState(
     };
   });
   
-  // Put one card face up on discard pile
   const firstDiscard = deck.pop()!;
   
   return {
@@ -65,14 +59,13 @@ export function createInitialGameState(
     activePlayerIndex: 0,
     turnPhase: 'draw',
     drawnCard: null,
-    wakeUpCalledBy: null,
+    takeTwoCards: null,
     pendingEffect: null,
     targetScore,
     version: 1,
   };
 }
 
-// Check if an action is valid
 export function isActionValid(state: GameState, playerId: string, action: PlayerAction): boolean {
   const player = state.players.find(p => p.playerId === playerId);
   if (!player) return false;
@@ -111,41 +104,33 @@ export function isActionValid(state: GameState, playerId: string, action: Player
              hasEffect(state.drawnCard);
              
     case 'DECLARE_WAKE_UP':
+      // Per rules: Pobudka is called at START of turn, INSTEAD of drawing
       return isActivePlayer && 
              state.phase === 'playing' && 
-             state.turnPhase === 'draw' &&
-             state.wakeUpCalledBy === null;
+             state.turnPhase === 'draw';
              
-    case 'SELECT_OWN_SLOT':
+    case 'SELECT_SLOT':
       return state.pendingEffect !== null &&
              state.pendingEffect.sourcePlayerId === playerId &&
-             state.pendingEffect.awaitingSelection === 'own_slot' &&
+             state.pendingEffect.awaitingSelection !== null &&
              action.slotIndex >= 0 && 
              action.slotIndex < 4;
-             
-    case 'SELECT_OTHER_SLOT':
-      return state.pendingEffect !== null &&
-             state.pendingEffect.sourcePlayerId === playerId &&
-             state.pendingEffect.awaitingSelection === 'other_slot' &&
-             action.targetPlayerId !== playerId &&
-             action.slotIndex >= 0 && 
-             action.slotIndex < 4;
-             
-    case 'CONFIRM_SWAP':
-      return state.pendingEffect !== null &&
-             state.pendingEffect.sourcePlayerId === playerId &&
-             state.pendingEffect.awaitingSelection === 'confirm_swap';
              
     case 'CANCEL_EFFECT':
       return state.pendingEffect !== null &&
              state.pendingEffect.sourcePlayerId === playerId;
+             
+    case 'CHOOSE_TAKE_TWO_CARD':
+      return isActivePlayer &&
+             state.turnPhase === 'take_two_choose' &&
+             state.takeTwoCards !== null &&
+             (action.cardIndex === 0 || action.cardIndex === 1);
              
     default:
       return false;
   }
 }
 
-// Apply an action to the game state (returns new state)
 export function applyAction(state: GameState, playerId: string, action: PlayerAction): GameState {
   if (!isActionValid(state, playerId, action)) {
     console.warn('Invalid action:', action, 'by player:', playerId);
@@ -161,7 +146,6 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
   switch (action.type) {
     case 'ACKNOWLEDGE_INITIAL_PEEK':
       player.hasSeenInitialCards = true;
-      // Check if all players have acknowledged
       if (newState.players.every(p => p.hasSeenInitialCards)) {
         newState.phase = 'playing';
       }
@@ -173,6 +157,7 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
       break;
       
     case 'DRAW_FROM_DISCARD':
+      // Per rules: Drawing from discard = MUST swap
       newState.drawnCard = newState.discard.pop()!;
       newState.turnPhase = 'action';
       break;
@@ -201,41 +186,35 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
         newState.discard.push(newState.drawnCard);
         newState.drawnCard = null;
         
-        newState.pendingEffect = {
-          type: effectType,
-          sourcePlayerId: playerId,
-          selectedSlots: [],
-          peekedCard: null,
-          awaitingSelection: effectType === 'peek_own' ? 'own_slot' : 'other_slot',
-        };
-        newState.turnPhase = 'effect';
-      }
-      break;
-      
-    case 'DECLARE_WAKE_UP':
-      newState.wakeUpCalledBy = playerId;
-      newState.turnPhase = 'action';
-      // After wake up is called, the player still draws and plays
-      // The round ends after completing the round back to the caller
-      break;
-      
-    case 'SELECT_OWN_SLOT':
-      if (newState.pendingEffect) {
-        const slot = player.dreamSlots[action.slotIndex];
-        newState.pendingEffect.selectedSlots.push({ playerId, slotIndex: action.slotIndex });
-        
-        if (newState.pendingEffect.type === 'peek_own') {
-          newState.pendingEffect.peekedCard = slot.card;
-          newState.pendingEffect.awaitingSelection = null;
-          // Auto-complete after brief peek
-          setTimeout(() => {}, 0); // Viewer handles this
-        } else if (newState.pendingEffect.type === 'swap_blind' || newState.pendingEffect.type === 'swap_peek') {
-          newState.pendingEffect.awaitingSelection = 'other_slot';
+        if (effectType === 'take_two') {
+          // Draw 2 cards
+          const card1 = newState.deck.pop();
+          const card2 = newState.deck.pop();
+          if (card1 && card2) {
+            newState.takeTwoCards = [card1, card2];
+            newState.turnPhase = 'take_two_choose';
+          } else {
+            endTurn(newState);
+          }
+        } else {
+          newState.pendingEffect = {
+            type: effectType,
+            sourcePlayerId: playerId,
+            selectedSlots: [],
+            peekedCard: null,
+            awaitingSelection: 'any_slot',
+          };
+          newState.turnPhase = 'effect';
         }
       }
       break;
       
-    case 'SELECT_OTHER_SLOT':
+    case 'DECLARE_WAKE_UP':
+      // Per rules: Round ends IMMEDIATELY when Pobudka is called
+      endRound(newState);
+      break;
+      
+    case 'SELECT_SLOT':
       if (newState.pendingEffect) {
         const targetPlayer = newState.players.find(p => p.playerId === action.targetPlayerId);
         if (targetPlayer) {
@@ -244,38 +223,20 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
             slotIndex: action.slotIndex 
           });
           
-          if (newState.pendingEffect.type === 'peek_other') {
+          if (newState.pendingEffect.type === 'peek_any') {
+            // Peek at the card
             const slot = targetPlayer.dreamSlots[action.slotIndex];
             newState.pendingEffect.peekedCard = slot.card;
             newState.pendingEffect.awaitingSelection = null;
           } else if (newState.pendingEffect.type === 'swap_blind') {
-            // Perform blind swap
-            if (newState.pendingEffect.selectedSlots.length === 2) {
+            if (newState.pendingEffect.selectedSlots.length === 1) {
+              newState.pendingEffect.awaitingSelection = 'second_slot';
+            } else if (newState.pendingEffect.selectedSlots.length === 2) {
               performSwap(newState, newState.pendingEffect.selectedSlots);
               newState.pendingEffect = null;
               endTurn(newState);
-            } else {
-              newState.pendingEffect.awaitingSelection = 'own_slot';
             }
-          } else if (newState.pendingEffect.type === 'swap_peek') {
-            const slot = targetPlayer.dreamSlots[action.slotIndex];
-            newState.pendingEffect.peekedCard = slot.card;
-            newState.pendingEffect.awaitingSelection = 'confirm_swap';
           }
-        }
-      }
-      break;
-      
-    case 'CONFIRM_SWAP':
-      if (newState.pendingEffect && newState.pendingEffect.selectedSlots.length >= 1) {
-        // For swap_peek, we swap the peeked card with one of our own
-        // Need to select own slot first
-        if (newState.pendingEffect.selectedSlots.length === 1) {
-          newState.pendingEffect.awaitingSelection = 'own_slot';
-        } else {
-          performSwap(newState, newState.pendingEffect.selectedSlots);
-          newState.pendingEffect = null;
-          endTurn(newState);
         }
       }
       break;
@@ -284,12 +245,22 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
       newState.pendingEffect = null;
       endTurn(newState);
       break;
+      
+    case 'CHOOSE_TAKE_TWO_CARD':
+      if (newState.takeTwoCards) {
+        const keptCard = newState.takeTwoCards[action.cardIndex];
+        const discardedCard = newState.takeTwoCards[action.cardIndex === 0 ? 1 : 0];
+        newState.discard.push(discardedCard);
+        newState.drawnCard = keptCard;
+        newState.takeTwoCards = null;
+        newState.turnPhase = 'action';
+      }
+      break;
   }
   
   return newState;
 }
 
-// Helper: perform a swap between two slots
 function performSwap(state: GameState, slots: { playerId: string; slotIndex: number }[]) {
   if (slots.length !== 2) return;
   
@@ -303,25 +274,15 @@ function performSwap(state: GameState, slots: { playerId: string; slotIndex: num
   }
 }
 
-// Helper: end the current turn
 function endTurn(state: GameState) {
   state.turnPhase = 'draw';
   state.drawnCard = null;
   state.pendingEffect = null;
+  state.takeTwoCards = null;
   
-  // Move to next player
-  const nextIndex = (state.activePlayerIndex + 1) % state.players.length;
-  state.activePlayerIndex = nextIndex;
+  state.activePlayerIndex = (state.activePlayerIndex + 1) % state.players.length;
   
-  // Check if round ends (wake up was called and we're back to the caller)
-  if (state.wakeUpCalledBy !== null) {
-    const callerIndex = state.players.findIndex(p => p.playerId === state.wakeUpCalledBy);
-    if (nextIndex === callerIndex) {
-      endRound(state);
-    }
-  }
-  
-  // Check if deck is empty - reshuffle discard
+  // Reshuffle if needed
   if (state.deck.length === 0 && state.discard.length > 1) {
     const topDiscard = state.discard.pop()!;
     state.deck = shuffleArray(state.discard);
@@ -329,11 +290,13 @@ function endTurn(state: GameState) {
   }
 }
 
-// Helper: end the current round
 function endRound(state: GameState) {
   state.phase = 'scoring';
   
-  // Reveal all cards and calculate scores
+  // Find lowest score for penalty calculation
+  let lowestScore = Infinity;
+  
+  // First pass: calculate raw scores
   for (const player of state.players) {
     player.roundScore = 0;
     for (const slot of player.dreamSlots) {
@@ -342,6 +305,11 @@ function endRound(state: GameState) {
         player.roundScore += getCrowValue(slot.card);
       }
     }
+    lowestScore = Math.min(lowestScore, player.roundScore);
+  }
+  
+  // Add scores to total (no penalty system in current implementation)
+  for (const player of state.players) {
     player.totalScore += player.roundScore;
   }
   
@@ -352,12 +320,10 @@ function endRound(state: GameState) {
   }
 }
 
-// Start a new round
 export function startNewRound(state: GameState): GameState {
   const newState = JSON.parse(JSON.stringify(state)) as GameState;
   newState.version++;
   
-  // Create new deck and deal
   const deck = shuffleArray(createDeck());
   
   for (const player of newState.players) {
@@ -379,18 +345,16 @@ export function startNewRound(state: GameState): GameState {
   newState.activePlayerIndex = 0;
   newState.turnPhase = 'draw';
   newState.drawnCard = null;
-  newState.wakeUpCalledBy = null;
+  newState.takeTwoCards = null;
   newState.pendingEffect = null;
   
   return newState;
 }
 
-// Derive the public view for a specific player
 export function derivePlayerView(state: GameState, viewerId: string): PlayerGameView {
   const viewerPlayer = state.players.find(p => p.playerId === viewerId);
   const isActivePlayer = state.players[state.activePlayerIndex]?.playerId === viewerId;
   
-  // Build my dream slots view (I can see my own cards)
   const myDreamSlots: PublicDreamSlotView[] = viewerPlayer?.dreamSlots.map((slot, index) => {
     const canSeeCard = 
       slot.isRevealed || 
@@ -408,7 +372,6 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
     };
   }) ?? [];
   
-  // Build other players' views
   const players: PublicPlayerView[] = state.players.map(player => {
     const isMe = player.playerId === viewerId;
     const dreamSlots: PublicDreamSlotView[] = player.dreamSlots.map(slot => {
@@ -439,7 +402,6 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
     };
   });
   
-  // Build pending effect view
   let pendingEffectView = null;
   if (state.pendingEffect && state.pendingEffect.sourcePlayerId === viewerId) {
     pendingEffectView = {
@@ -452,8 +414,16 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
     };
   }
   
-  // Build top discard view
   const topDiscard = state.discard.length > 0 ? state.discard[state.discard.length - 1] : null;
+  
+  // Take two cards view
+  let takeTwoCardsView = null;
+  if (isActivePlayer && state.takeTwoCards) {
+    takeTwoCardsView = state.takeTwoCards.map(card => ({
+      instanceId: card.instanceId,
+      visible: getCardDefinition(card.definitionId) ?? null,
+    }));
+  }
   
   return {
     roomId: state.roomId,
@@ -477,7 +447,7 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
       instanceId: state.drawnCard.instanceId,
       visible: getCardDefinition(state.drawnCard.definitionId) ?? null,
     } : null,
-    wakeUpCalledBy: state.wakeUpCalledBy,
+    takeTwoCards: takeTwoCardsView,
     pendingEffect: pendingEffectView,
     version: state.version,
   };

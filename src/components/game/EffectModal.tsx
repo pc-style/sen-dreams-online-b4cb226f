@@ -1,126 +1,99 @@
 /**
- * Effect Modal Component
- * Shows when a special card effect is being resolved
+ * Effect Modal - Dreamy themed
  */
 
 import { PublicCardView, EffectType } from '@/game/types';
 import { Button } from '@/components/ui/button';
-import { Bird, Eye, Shuffle, X } from 'lucide-react';
+import { Cat, Eye, Shuffle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EffectModalProps {
   effect: {
     type: EffectType;
-    awaitingSelection: 'own_slot' | 'other_slot' | 'confirm_swap' | null;
+    awaitingSelection: 'any_slot' | 'second_slot' | null;
     peekedCard: PublicCardView | null;
   };
-  onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function EffectModal({ effect, onConfirm, onCancel }: EffectModalProps) {
-  const getEffectTitle = () => {
+export function EffectModal({ effect, onCancel }: EffectModalProps) {
+  const getTitle = () => {
     switch (effect.type) {
-      case 'peek_own': return 'Wise Owl';
-      case 'peek_other': return 'Curious Cat';
-      case 'swap_blind': return 'Sneaky Mouse';
-      case 'swap_peek': return 'Clever Fox';
+      case 'peek_any': return 'Podejrzyj 1';
+      case 'swap_blind': return 'Zamień 2';
       default: return 'Card Effect';
     }
   };
   
-  const getEffectDescription = () => {
+  const getDescription = () => {
+    if (effect.peekedCard) return 'You peeked at this card:';
     switch (effect.awaitingSelection) {
-      case 'own_slot':
-        if (effect.type === 'peek_own') {
-          return 'Select one of your dream cards to peek at';
-        }
-        return 'Select one of your dream cards';
-      case 'other_slot':
-        return 'Select a card from another player\'s dream';
-      case 'confirm_swap':
-        return 'Do you want to swap this card?';
+      case 'any_slot': 
+        return effect.type === 'peek_any' 
+          ? 'Select any card to peek at' 
+          : 'Select first card to swap';
+      case 'second_slot':
+        return 'Select second card to swap';
       default:
-        if (effect.peekedCard) {
-          return 'You peeked at this card';
-        }
-        return 'Effect resolving...';
+        return '';
     }
   };
   
   const getIcon = () => {
     switch (effect.type) {
-      case 'peek_own':
-      case 'peek_other':
-        return <Eye className="w-8 h-8 text-accent" />;
-      case 'swap_blind':
-      case 'swap_peek':
-        return <Shuffle className="w-8 h-8 text-accent" />;
-      default:
-        return null;
+      case 'peek_any': return <Eye className="w-6 h-6 text-purple-300" />;
+      case 'swap_blind': return <Shuffle className="w-6 h-6 text-purple-300" />;
+      default: return null;
     }
   };
   
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-card border border-border rounded-xl p-6 max-w-sm w-full shadow-xl animate-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-3">
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-slate-900/90 border border-purple-500/30 rounded-xl p-4 max-w-xs w-full shadow-xl animate-in zoom-in-95">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex items-center gap-2">
             {getIcon()}
-            <h2 className="text-xl font-bold">{getEffectTitle()}</h2>
+            <h2 className="text-lg font-bold text-purple-100">{getTitle()}</h2>
           </div>
           <button
             onClick={onCancel}
-            className="p-1 hover:bg-muted rounded-full transition-colors"
+            className="p-1 hover:bg-purple-500/20 rounded-full transition-colors"
           >
-            <X className="w-5 h-5 text-muted-foreground" />
+            <X className="w-4 h-4 text-purple-300" />
           </button>
         </div>
         
-        <p className="text-muted-foreground mb-6">
-          {getEffectDescription()}
-        </p>
+        <p className="text-purple-300/70 text-sm mb-4">{getDescription()}</p>
         
-        {/* Show peeked card */}
         {effect.peekedCard?.visible && (
-          <div className="flex justify-center mb-6">
-            <div className="w-24 h-32 bg-card border-2 border-accent rounded-lg flex flex-col items-center justify-center shadow-lg">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-24 bg-slate-800/80 border-2 border-purple-400/50 rounded-lg flex flex-col items-center justify-center shadow-lg">
               <div className={cn(
-                "text-3xl font-bold",
-                effect.peekedCard.visible.crowValue <= 2 && "text-emerald-600",
-                effect.peekedCard.visible.crowValue > 2 && effect.peekedCard.visible.crowValue <= 5 && "text-amber-600",
-                effect.peekedCard.visible.crowValue > 5 && "text-rose-600"
+                "text-2xl font-bold",
+                effect.peekedCard.visible.crowValue <= 2 ? "text-emerald-400" :
+                effect.peekedCard.visible.crowValue <= 5 ? "text-amber-400" : "text-rose-400"
               )}>
                 {effect.peekedCard.visible.crowValue}
               </div>
-              <div className="flex items-center gap-0.5 mt-1">
-                {Array.from({ length: Math.min(effect.peekedCard.visible.crowValue, 5) }).map((_, i) => (
-                  <Bird key={i} className="w-3 h-3 text-muted-foreground" />
+              <div className="flex gap-0.5 mt-0.5">
+                {Array.from({ length: Math.min(effect.peekedCard.visible.crowValue, 3) }).map((_, i) => (
+                  <Cat key={i} className="w-2 h-2 text-purple-300" />
                 ))}
               </div>
-              <div className="text-xs text-muted-foreground mt-2 text-center px-1">
+              <div className="text-[8px] text-purple-300/60 mt-1">
                 {effect.peekedCard.visible.name}
               </div>
             </div>
           </div>
         )}
         
-        {/* Action buttons */}
-        <div className="flex gap-3">
-          <Button onClick={onCancel} variant="outline" className="flex-1">
-            Cancel
-          </Button>
-          {effect.awaitingSelection === 'confirm_swap' && (
-            <Button onClick={onConfirm} className="flex-1">
-              Swap Cards
-            </Button>
-          )}
-          {effect.awaitingSelection === null && effect.peekedCard && (
-            <Button onClick={onCancel} className="flex-1">
-              Done
-            </Button>
-          )}
-        </div>
+        <Button 
+          onClick={onCancel} 
+          variant="outline" 
+          className="w-full bg-transparent border-purple-500/30 text-purple-200 hover:bg-purple-500/10"
+        >
+          {effect.peekedCard ? 'Done' : 'Cancel'}
+        </Button>
       </div>
     </div>
   );
