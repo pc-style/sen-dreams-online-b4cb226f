@@ -1,11 +1,11 @@
 /**
- * Central Game Area - Accessible, animated design
+ * Central Game Area - Clean, neutral design with large 2:3 cards
  */
 
 import { cn } from '@/lib/utils';
 import { PublicCardView, TurnPhase, CardDefinition } from '@/game/types';
 import { Button } from '@/components/ui/button';
-import { Moon, Cat, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 interface CentralAreaProps {
   deckCount: number;
@@ -49,72 +49,83 @@ export function CentralArea({
       {/* Turn indicator */}
       {isMyTurn && turnPhase === 'draw' && (
         <div className="text-center animate-fade-in">
-          <h2 className="text-purple-200 font-bold text-lg sm:text-xl mb-1">Your Turn</h2>
-          <p className="text-sm sm:text-base text-purple-300/70">Draw a card or declare Pobudka!</p>
+          <h2 className="text-foreground font-bold text-lg sm:text-xl mb-1">Your Turn</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Draw a card or declare Pobudka!</p>
         </div>
       )}
       
-      {/* Wake up button */}
+      {/* Pobudka button */}
       {isMyTurn && turnPhase === 'draw' && (
         <Button
           onClick={onDeclareWakeUp}
           variant="outline"
           size="lg"
-          className="border-2 border-amber-500/60 text-amber-400 hover:bg-amber-500/20 bg-transparent font-bold text-base sm:text-lg px-6 py-3"
+          className="border-2 border-primary/60 text-primary hover:bg-primary/10 font-bold text-base sm:text-lg px-6 py-3"
         >
           <Sparkles className="w-5 h-5 mr-2" />
           Pobudka!
         </Button>
       )}
       
-      {/* Deck and Discard */}
-      <div className="flex items-center gap-6 sm:gap-8">
+      {/* Deck and Discard - large 2:3 cards */}
+      <div className="flex items-center gap-6 sm:gap-10">
         {/* Deck */}
         <button
           onClick={onDrawFromDeck}
           disabled={!showDrawOptions || deckCount === 0}
           aria-label={`Draw from deck, ${deckCount} cards remaining`}
           className={cn(
-            "relative w-20 h-28 sm:w-24 sm:h-34 md:w-28 md:h-40 rounded-xl transition-all duration-200",
-            "bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800",
-            "border-2 border-purple-400/50",
+            "relative w-[90px] h-[135px] sm:w-[104px] sm:h-[156px] md:w-[120px] md:h-[180px]",
+            "rounded-lg transition-all duration-200",
+            "border-2 shadow-card overflow-hidden",
             "flex flex-col items-center justify-center",
-            "shadow-xl shadow-purple-900/50",
-            showDrawOptions && deckCount > 0 && "cursor-pointer hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/40 hover:border-purple-300",
-            (!showDrawOptions || deckCount === 0) && "opacity-60 cursor-not-allowed"
+            showDrawOptions && deckCount > 0 && [
+              "cursor-pointer hover:scale-105 hover:shadow-card-hover hover:-translate-y-1",
+              "border-primary/50 hover:border-primary"
+            ],
+            (!showDrawOptions || deckCount === 0) && "opacity-50 cursor-not-allowed border-border"
           )}
         >
-          <Moon className="w-8 h-8 sm:w-10 sm:h-10 text-purple-200/70" />
-          <span className="text-purple-200/60 text-sm sm:text-base font-medium mt-1">Deck</span>
+          {/* Card back image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: 'url(/cards/back.png)' }}
+          />
+          
+          {/* Deck count badge */}
           <div className={cn(
-            "absolute -top-2 -right-2 w-8 h-8 sm:w-9 sm:h-9 rounded-full",
-            "bg-slate-800 border-2 border-purple-400/50",
-            "flex items-center justify-center text-sm sm:text-base font-bold text-purple-200",
-            "shadow-lg"
+            "absolute -top-2 -right-2 w-8 h-8 rounded-full",
+            "bg-card border-2 border-border",
+            "flex items-center justify-center text-sm font-bold text-foreground",
+            "shadow-md z-10"
           )}>
             {deckCount}
           </div>
         </button>
         
-        {/* Discard */}
+        {/* Discard pile */}
         <button
           onClick={onDrawFromDiscard}
           disabled={!showDrawOptions || !topDiscard}
           aria-label={`Draw from discard pile${topDiscard?.visible ? `, top card is ${topDiscard.visible.crowValue}` : ''}`}
           className={cn(
-            "relative w-20 h-28 sm:w-24 sm:h-34 md:w-28 md:h-40 rounded-xl transition-all duration-200",
-            "border-2 shadow-xl",
+            "relative w-[90px] h-[135px] sm:w-[104px] sm:h-[156px] md:w-[120px] md:h-[180px]",
+            "rounded-lg transition-all duration-200",
+            "border-2 shadow-card",
             topDiscard 
-              ? "bg-slate-800/90 border-purple-400/50" 
-              : "bg-slate-800/50 border-dashed border-purple-400/30",
-            showDrawOptions && topDiscard && "cursor-pointer hover:scale-105 hover:shadow-2xl hover:shadow-purple-400/30 hover:border-purple-300",
-            (!showDrawOptions || !topDiscard) && "opacity-60 cursor-not-allowed"
+              ? "bg-card border-border" 
+              : "bg-muted/30 border-dashed border-muted-foreground/30",
+            showDrawOptions && topDiscard && [
+              "cursor-pointer hover:scale-105 hover:shadow-card-hover hover:-translate-y-1",
+              "hover:border-primary"
+            ],
+            (!showDrawOptions || !topDiscard) && "opacity-50 cursor-not-allowed"
           )}
         >
           {topDiscard?.visible ? (
             <PileCardFace definition={topDiscard.visible} />
           ) : (
-            <span className="text-purple-300/40 text-sm sm:text-base font-medium">Empty</span>
+            <span className="text-muted-foreground/50 text-sm font-medium">Discard</span>
           )}
         </button>
       </div>
@@ -122,16 +133,16 @@ export function CentralArea({
       {/* Take Two choice */}
       {showTakeTwoOptions && takeTwoCards && (
         <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <h3 className="text-base sm:text-lg font-bold text-purple-200">Choose one card to keep:</h3>
+          <h3 className="text-base sm:text-lg font-bold text-foreground">Choose one card to keep:</h3>
           <div className="flex gap-4 sm:gap-6">
             {takeTwoCards.map((card, idx) => (
               <button
                 key={idx}
                 onClick={() => onChooseTakeTwo(idx)}
                 className={cn(
-                  "w-22 h-32 sm:w-28 sm:h-40 rounded-xl",
-                  "bg-slate-800/90 border-2 border-purple-400/60",
-                  "hover:border-purple-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-400/30",
+                  "w-[90px] h-[135px] sm:w-[104px] sm:h-[156px] rounded-lg",
+                  "bg-card border-2 border-border",
+                  "hover:border-primary hover:scale-105 hover:shadow-card-hover hover:-translate-y-1",
                   "transition-all duration-200"
                 )}
               >
@@ -142,20 +153,19 @@ export function CentralArea({
         </div>
       )}
       
-      {/* Drawn card */}
+      {/* Drawn card display */}
       {drawnCard && !showTakeTwoOptions && (
-        <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <h3 className="text-base sm:text-lg font-semibold text-purple-200/90">You drew:</h3>
+        <div className="flex flex-col items-center gap-4 animate-card-enter">
+          <h3 className="text-base sm:text-lg font-semibold text-foreground/90">You drew:</h3>
           <div className={cn(
-            "w-24 h-34 sm:w-32 sm:h-44 md:w-36 md:h-50 rounded-xl",
-            "bg-slate-800/90 border-2 border-purple-400/60",
-            "shadow-2xl shadow-purple-500/30",
-            "flex items-center justify-center",
-            "animate-scale-in"
+            "w-[110px] h-[165px] sm:w-[128px] sm:h-[192px] md:w-[140px] md:h-[210px]",
+            "rounded-lg bg-card border-2 border-primary/50",
+            "shadow-glow flex items-center justify-center"
           )}>
             {drawnCard.visible && <DrawnCardFace definition={drawnCard.visible} />}
           </div>
           
+          {/* Action buttons */}
           {showActionOptions && (
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               {canDiscard && (
@@ -163,7 +173,7 @@ export function CentralArea({
                   onClick={onDiscard} 
                   variant="outline" 
                   size="lg"
-                  className="bg-transparent border-2 border-purple-400/50 text-purple-200 hover:bg-purple-500/20 font-semibold text-sm sm:text-base px-5 py-2.5"
+                  className="border-border text-foreground hover:bg-muted font-semibold text-sm sm:text-base px-5 py-2.5"
                 >
                   Discard
                 </Button>
@@ -172,7 +182,7 @@ export function CentralArea({
                 <Button 
                   onClick={onUseEffect} 
                   size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-sm sm:text-base px-5 py-2.5"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm sm:text-base px-5 py-2.5"
                 >
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Use Effect
@@ -180,8 +190,9 @@ export function CentralArea({
               )}
             </div>
           )}
+          
           {showActionOptions && (
-            <p className="text-sm sm:text-base text-purple-300/70 text-center max-w-xs">
+            <p className="text-sm sm:text-base text-muted-foreground text-center max-w-xs">
               {canDiscard 
                 ? 'Or tap a dream slot to swap this card' 
                 : 'Tap a dream slot to swap (must keep this card)'}
@@ -194,23 +205,30 @@ export function CentralArea({
 }
 
 function PileCardFace({ definition }: { definition: CardDefinition }) {
-  const getColor = (value: number) => {
-    if (value <= 2) return 'text-emerald-400';
-    if (value <= 5) return 'text-amber-400';
-    return 'text-rose-400';
+  const getValueColor = (value: number) => {
+    if (value <= 2) return 'text-game-success';
+    if (value <= 5) return 'text-game-warning';
+    return 'text-game-danger';
   };
   
   return (
     <div className="flex flex-col items-center justify-center h-full p-2 sm:p-3">
-      <div className={cn("text-3xl sm:text-4xl md:text-5xl font-bold leading-none", getColor(definition.crowValue))}>
+      <div className={cn("text-3xl sm:text-4xl md:text-5xl font-bold leading-none", getValueColor(definition.crowValue))}>
         {definition.crowValue}
       </div>
-      <div className="flex gap-1 mt-1 sm:mt-2">
-        {Array.from({ length: Math.min(definition.crowValue, 4) }).map((_, i) => (
-          <Cat key={i} className={cn("w-3 h-3 sm:w-4 sm:h-4", getColor(definition.crowValue))} />
+      <div className="flex gap-0.5 mt-2">
+        {Array.from({ length: Math.min(definition.crowValue, 5) }).map((_, i) => (
+          <div 
+            key={i} 
+            className={cn(
+              "w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full",
+              definition.crowValue <= 2 ? "bg-game-success" :
+              definition.crowValue <= 5 ? "bg-game-warning" : "bg-game-danger"
+            )} 
+          />
         ))}
       </div>
-      <div className="text-xs sm:text-sm text-purple-300/70 mt-1 sm:mt-2 line-clamp-1 px-1 text-center">
+      <div className="text-xs sm:text-sm text-muted-foreground mt-2 line-clamp-1 px-1 text-center">
         {definition.name}
       </div>
     </div>
@@ -218,33 +236,40 @@ function PileCardFace({ definition }: { definition: CardDefinition }) {
 }
 
 function DrawnCardFace({ definition }: { definition: CardDefinition }) {
-  const getColor = (value: number) => {
-    if (value <= 2) return 'text-emerald-400';
-    if (value <= 5) return 'text-amber-400';
-    return 'text-rose-400';
+  const getValueColor = (value: number) => {
+    if (value <= 2) return 'text-game-success';
+    if (value <= 5) return 'text-game-warning';
+    return 'text-game-danger';
   };
   
   const hasEffect = definition.effectType !== 'none';
   
   return (
     <div className="flex flex-col items-center justify-center h-full p-3 sm:p-4">
-      <div className={cn("text-4xl sm:text-5xl md:text-6xl font-bold leading-none", getColor(definition.crowValue))}>
+      <div className={cn("text-4xl sm:text-5xl md:text-6xl font-bold leading-none", getValueColor(definition.crowValue))}>
         {definition.crowValue}
       </div>
-      <div className="flex gap-1 sm:gap-1.5 mt-2 sm:mt-3">
+      <div className="flex gap-1 mt-2 sm:mt-3">
         {Array.from({ length: Math.min(definition.crowValue, 5) }).map((_, i) => (
-          <Cat key={i} className={cn("w-4 h-4 sm:w-5 sm:h-5", getColor(definition.crowValue))} />
+          <div 
+            key={i} 
+            className={cn(
+              "w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full",
+              definition.crowValue <= 2 ? "bg-game-success" :
+              definition.crowValue <= 5 ? "bg-game-warning" : "bg-game-danger"
+            )} 
+          />
         ))}
       </div>
       <div className={cn(
         "mt-2 sm:mt-3 text-center px-2",
-        hasEffect ? "text-purple-200 font-bold" : "text-purple-300/80",
+        hasEffect ? "text-accent font-bold" : "text-foreground/80",
         "text-sm sm:text-base"
       )}>
         {definition.name}
       </div>
       {hasEffect && (
-        <div className="text-xs sm:text-sm text-purple-400/70 text-center px-2 mt-1">
+        <div className="text-xs sm:text-sm text-muted-foreground text-center px-2 mt-1">
           {definition.description}
         </div>
       )}

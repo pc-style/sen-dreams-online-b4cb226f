@@ -1,5 +1,6 @@
 /**
  * Sen Card Game - Landing Page
+ * Clean, neutral design
  */
 
 import { useState } from 'react';
@@ -7,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { usePlayerId, useCreateRoom, useFindRoom, useJoinRoom } from '@/game/hooks';
-import { Moon, Users, Play, Bird, Sparkles, Star } from 'lucide-react';
+import { Moon, Users, Play, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Index() {
@@ -80,46 +81,33 @@ export default function Index() {
   };
   
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 flex flex-col relative overflow-hidden">
-      {/* Decorative stars */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <Star className="absolute top-20 left-[10%] w-3 h-3 text-yellow-200/40 animate-pulse" />
-        <Star className="absolute top-32 right-[15%] w-2 h-2 text-yellow-200/30 animate-pulse" style={{ animationDelay: '0.5s' }} />
-        <Star className="absolute top-48 left-[25%] w-2 h-2 text-purple-300/40 animate-pulse" style={{ animationDelay: '1s' }} />
-        <Star className="absolute top-24 right-[30%] w-3 h-3 text-blue-200/30 animate-pulse" style={{ animationDelay: '1.5s' }} />
-        <Star className="absolute bottom-32 left-[20%] w-2 h-2 text-yellow-200/30 animate-pulse" style={{ animationDelay: '0.7s' }} />
-        <Star className="absolute bottom-48 right-[25%] w-3 h-3 text-purple-300/30 animate-pulse" style={{ animationDelay: '1.2s' }} />
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-500/10 rounded-full blur-3xl" />
-      </div>
-
+    <main className="min-h-screen bg-background flex flex-col">
       {/* Hero section */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center relative z-10">
-        <div className="max-w-md w-full space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full space-y-8 animate-fade-in">
           {/* Logo and title */}
           <div className="space-y-6">
             <div className="relative inline-block">
-              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-purple-400/20 to-indigo-600/20 backdrop-blur-sm flex items-center justify-center border border-purple-400/30 shadow-lg shadow-purple-500/20">
-                <Moon className="w-12 h-12 text-purple-200" />
+              <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                <Moon className="w-12 h-12 text-primary" />
               </div>
-              <Sparkles className="w-5 h-5 absolute -top-1 -right-1 text-yellow-300 animate-pulse" />
-              <Sparkles className="w-4 h-4 absolute -bottom-1 -left-2 text-purple-300 animate-pulse" style={{ animationDelay: '0.5s' }} />
+              <Sparkles className="w-5 h-5 absolute -top-1 -right-1 text-primary animate-pulse-soft" />
             </div>
             <div>
-              <h1 className="text-6xl font-bold tracking-tight bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200 bg-clip-text text-transparent">
+              <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-foreground">
                 Sen
               </h1>
-              <p className="text-lg text-purple-200/70 mt-3">
+              <p className="text-lg text-muted-foreground mt-3">
                 A game of dreams, memory, and hidden cards
               </p>
             </div>
           </div>
           
           {/* Main card */}
-          <div className="bg-slate-900/60 backdrop-blur-md border border-purple-500/20 rounded-2xl p-6 shadow-xl shadow-purple-900/30">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
             {/* Name input */}
             <div className="space-y-2 mb-6">
-              <label htmlFor="name" className="text-sm font-medium text-purple-200/80">
+              <label htmlFor="name" className="text-sm font-medium text-foreground/80">
                 Your Name
               </label>
               <Input
@@ -128,7 +116,7 @@ export default function Index() {
                 placeholder="Enter your name..."
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
-                className="text-center text-lg bg-slate-800/50 border-purple-500/30 text-purple-100 placeholder:text-purple-300/40 focus:border-purple-400 focus:ring-purple-400/20"
+                className="text-center text-lg bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/50"
                 maxLength={20}
               />
             </div>
@@ -140,7 +128,7 @@ export default function Index() {
                   onClick={handleCreateRoom}
                   disabled={isCreating}
                   size="lg"
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-purple-600/30"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
                 >
                   <Play className="w-5 h-5 mr-2" />
                   {isCreating ? 'Creating...' : 'Create Game'}
@@ -149,7 +137,7 @@ export default function Index() {
                   onClick={() => setShowJoin(true)}
                   variant="outline"
                   size="lg"
-                  className="w-full bg-transparent border-purple-500/40 text-purple-200 hover:bg-purple-500/10 hover:border-purple-400/60 hover:text-purple-100"
+                  className="w-full border-border text-foreground hover:bg-muted"
                 >
                   <Users className="w-5 h-5 mr-2" />
                   Join Game
@@ -162,7 +150,7 @@ export default function Index() {
                   placeholder="Enter room code (e.g., ABCD)"
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  className="text-center text-lg uppercase tracking-widest bg-slate-800/50 border-purple-500/30 text-purple-100 placeholder:text-purple-300/40 focus:border-purple-400"
+                  className="text-center text-lg uppercase tracking-widest bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/50"
                   maxLength={4}
                 />
                 <div className="flex gap-3">
@@ -170,7 +158,7 @@ export default function Index() {
                     onClick={() => setShowJoin(false)}
                     variant="outline"
                     size="lg"
-                    className="flex-1 bg-transparent border-purple-500/40 text-purple-200 hover:bg-purple-500/10"
+                    className="flex-1 border-border text-foreground hover:bg-muted"
                   >
                     Back
                   </Button>
@@ -178,7 +166,7 @@ export default function Index() {
                     onClick={handleJoinRoom}
                     disabled={isSearching || isJoining}
                     size="lg"
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-0"
+                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     {isSearching || isJoining ? 'Joining...' : 'Join'}
                   </Button>
@@ -188,26 +176,26 @@ export default function Index() {
           </div>
           
           {/* Game info */}
-          <div className="pt-6">
-            <h2 className="text-sm font-medium text-purple-300/60 mb-5">How to Play</h2>
-            <div className="grid grid-cols-3 gap-6 text-center">
-              <div className="space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-xl bg-purple-500/10 backdrop-blur-sm flex items-center justify-center border border-purple-500/20">
-                  <Bird className="w-6 h-6 text-purple-300" />
+          <div className="pt-4">
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">How to Play</h2>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="space-y-2">
+                <div className="w-10 h-10 mx-auto rounded-lg bg-muted/50 flex items-center justify-center border border-border">
+                  <span className="text-lg">🐱</span>
                 </div>
-                <p className="text-xs text-purple-200/60 leading-relaxed">Collect low<br />crow cards</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">Collect low<br />cat cards</p>
               </div>
-              <div className="space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-xl bg-purple-500/10 backdrop-blur-sm flex items-center justify-center border border-purple-500/20">
-                  <Moon className="w-6 h-6 text-purple-300" />
+              <div className="space-y-2">
+                <div className="w-10 h-10 mx-auto rounded-lg bg-muted/50 flex items-center justify-center border border-border">
+                  <Moon className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <p className="text-xs text-purple-200/60 leading-relaxed">Remember<br />your dreams</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">Remember<br />your dreams</p>
               </div>
-              <div className="space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-xl bg-purple-500/10 backdrop-blur-sm flex items-center justify-center border border-purple-500/20">
-                  <Sparkles className="w-6 h-6 text-purple-300" />
+              <div className="space-y-2">
+                <div className="w-10 h-10 mx-auto rounded-lg bg-muted/50 flex items-center justify-center border border-border">
+                  <Sparkles className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <p className="text-xs text-purple-200/60 leading-relaxed">Call Pobudka!<br />to win</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">Call Pobudka!<br />to win</p>
               </div>
             </div>
           </div>
@@ -215,8 +203,8 @@ export default function Index() {
       </div>
       
       {/* Footer */}
-      <footer className="py-4 text-center text-sm text-purple-300/40 relative z-10">
-        2-4 Players • Real-time Multiplayer
+      <footer className="py-4 text-center text-sm text-muted-foreground">
+        2-5 Players • Real-time Multiplayer
       </footer>
     </main>
   );

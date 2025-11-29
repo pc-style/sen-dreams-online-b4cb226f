@@ -1,10 +1,11 @@
 /**
- * Dream Card - Accessible, responsive design
+ * Dream Card - Clean, neutral design with 2:3 aspect ratio
+ * Ready for custom card artwork
  */
 
 import { cn } from '@/lib/utils';
 import { PublicDreamSlotView, CardDefinition } from '@/game/types';
-import { Moon, Eye, Cat } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
 interface DreamCardProps {
   slot: PublicDreamSlotView;
@@ -33,10 +34,11 @@ export function DreamCard({
   const isVisible = card?.visible !== null && card?.visible !== undefined;
   const shouldShow = showInitialPeek ? isPeekedDuringSetup : isVisible;
   
+  // 2:3 aspect ratio card sizes
   const sizeClasses = {
-    sm: 'w-16 h-22 sm:w-18 sm:h-26 md:w-20 md:h-28',
-    md: 'w-18 h-26 sm:w-22 sm:h-32 md:w-24 md:h-34',
-    lg: 'w-22 h-32 sm:w-28 sm:h-40 md:w-32 md:h-44',
+    sm: 'w-[70px] h-[105px] sm:w-[80px] sm:h-[120px]',
+    md: 'w-[90px] h-[135px] sm:w-[104px] sm:h-[156px]',
+    lg: 'w-[110px] h-[165px] sm:w-[128px] sm:h-[192px]',
   };
   
   return (
@@ -44,56 +46,69 @@ export function DreamCard({
       onClick={onClick}
       disabled={!isSelectable && !onClick}
       className={cn(
-        "relative rounded-xl transition-all duration-200 flex flex-col items-center justify-center",
-        "border-2 shadow-lg",
+        "relative aspect-card rounded-lg transition-all duration-200",
+        "flex flex-col items-center justify-center overflow-hidden",
+        "border-2 shadow-card",
         // Size
         sizeClasses[size],
         // Empty slot
-        !slot.hasCard && "border-dashed border-purple-400/30 bg-slate-800/40",
-        // Face down
-        slot.hasCard && !shouldShow && "bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 border-purple-400/40 shadow-purple-500/20",
+        !slot.hasCard && "border-dashed border-muted-foreground/30 bg-muted/20",
+        // Face down - uses card back image
+        slot.hasCard && !shouldShow && "bg-card border-border",
         // Face up
-        slot.hasCard && shouldShow && "bg-slate-800/90 border-purple-400/50 shadow-purple-400/10",
-        // Selectable
-        isSelectable && "cursor-pointer hover:scale-110 hover:shadow-xl hover:shadow-purple-400/30 hover:border-purple-300 ring-2 ring-purple-400/60 ring-offset-2 ring-offset-slate-900",
-        isSelected && "ring-2 ring-purple-300 scale-110 shadow-xl shadow-purple-400/40",
+        slot.hasCard && shouldShow && "bg-card border-border",
+        // Selectable state
+        isSelectable && [
+          "cursor-pointer",
+          "hover:scale-105 hover:shadow-card-hover hover:-translate-y-1",
+          "ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
+          "animate-pulse-glow"
+        ],
+        // Selected state
+        isSelected && "ring-2 ring-primary scale-105 shadow-card-active",
+        // Default
         !isSelectable && !onClick && "cursor-default"
       )}
       aria-label={`Dream slot ${index + 1}${shouldShow && card?.visible ? `, value ${card.visible.crowValue}` : ', face down'}`}
     >
       {!slot.hasCard ? (
-        <Moon className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400/40" />
+        // Empty slot
+        <div className="flex flex-col items-center justify-center text-muted-foreground/40">
+          <span className="text-xs font-medium">Empty</span>
+        </div>
       ) : shouldShow && card?.visible ? (
+        // Card face - show card content
         <CardFace definition={card.visible} size={size} />
       ) : (
-        <div className="flex flex-col items-center text-purple-200/70">
-          <Moon className="w-8 h-8 sm:w-10 sm:h-10" />
-          <span className="text-xs sm:text-sm mt-1 font-medium opacity-60">Dream</span>
-        </div>
+        // Card back
+        <div 
+          className="absolute inset-0 bg-cover bg-center rounded-md"
+          style={{ backgroundImage: 'url(/cards/back.png)' }}
+        />
       )}
       
-      {/* Slot number badge */}
+      {/* Slot number - small indicator */}
       <div className={cn(
-        "absolute -bottom-2 left-1/2 -translate-x-1/2",
-        "w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs sm:text-sm font-bold",
+        "absolute bottom-1 right-1",
+        "w-5 h-5 rounded-full text-[10px] font-bold",
         "flex items-center justify-center",
-        "bg-slate-800 border-2 border-purple-400/40 text-purple-200",
-        "shadow-md"
+        "bg-background/80 text-foreground/70 backdrop-blur-sm",
+        "border border-border/50"
       )}>
         {index + 1}
       </div>
       
-      {/* Peek indicator during setup */}
+      {/* Peek indicator during setup - tap to peek */}
       {showInitialPeek && !isPeekedDuringSetup && (
-        <div className="absolute -top-2 -right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-amber-500 flex items-center justify-center animate-pulse shadow-lg shadow-amber-500/50">
-          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+        <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center animate-pulse-glow">
+          <Eye className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
       )}
       
-      {/* Selected for peek indicator */}
+      {/* Already peeked indicator */}
       {isPeekedDuringSetup && (
-        <div className="absolute -top-2 -right-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/50">
-          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+        <div className="absolute top-1 right-1 w-6 h-6 rounded-full bg-game-success flex items-center justify-center">
+          <Eye className="w-3.5 h-3.5 text-primary-foreground" />
         </div>
       )}
     </button>
@@ -101,44 +116,56 @@ export function DreamCard({
 }
 
 function CardFace({ definition, size }: { definition: CardDefinition; size: 'sm' | 'md' | 'lg' }) {
-  const getColor = (value: number) => {
-    if (value <= 2) return 'text-emerald-400';
-    if (value <= 5) return 'text-amber-400';
-    return 'text-rose-400';
+  const getValueColor = (value: number) => {
+    if (value <= 2) return 'text-game-success';
+    if (value <= 5) return 'text-game-warning';
+    return 'text-game-danger';
   };
   
   const valueSize = {
-    sm: 'text-2xl sm:text-3xl',
-    md: 'text-3xl sm:text-4xl',
-    lg: 'text-4xl sm:text-5xl',
+    sm: 'text-2xl',
+    md: 'text-3xl',
+    lg: 'text-4xl',
   };
   
-  const catSize = {
-    sm: 'w-2.5 h-2.5 sm:w-3 sm:h-3',
-    md: 'w-3 h-3 sm:w-4 sm:h-4',
-    lg: 'w-4 h-4 sm:w-5 sm:h-5',
+  const nameSize = {
+    sm: 'text-[9px]',
+    md: 'text-[10px]',
+    lg: 'text-xs',
   };
   
   const hasEffect = definition.effectType !== 'none';
   
   return (
-    <div className="flex flex-col items-center justify-center p-1 sm:p-2">
+    <div className="flex flex-col items-center justify-center p-2 h-full w-full">
+      {/* Value */}
       <div className={cn(
         "font-bold leading-none",
-        getColor(definition.crowValue),
+        getValueColor(definition.crowValue),
         valueSize[size]
       )}>
         {definition.crowValue}
       </div>
-      <div className="flex gap-0.5 sm:gap-1 mt-1">
-        {Array.from({ length: Math.min(definition.crowValue, 4) }).map((_, i) => (
-          <Cat key={i} className={cn(catSize[size], getColor(definition.crowValue))} />
+      
+      {/* Cats indicator dots */}
+      <div className="flex gap-0.5 mt-1.5">
+        {Array.from({ length: Math.min(definition.crowValue, 5) }).map((_, i) => (
+          <div 
+            key={i} 
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              definition.crowValue <= 2 ? "bg-game-success" :
+              definition.crowValue <= 5 ? "bg-game-warning" : "bg-game-danger"
+            )} 
+          />
         ))}
       </div>
+      
+      {/* Card name */}
       <div className={cn(
-        "mt-1 sm:mt-2 text-center line-clamp-1 px-1",
-        hasEffect ? "text-purple-300 font-semibold" : "text-purple-300/70",
-        size === 'sm' ? 'text-[9px] sm:text-[10px]' : 'text-[10px] sm:text-xs'
+        "mt-2 text-center line-clamp-2 px-1 leading-tight",
+        hasEffect ? "text-accent font-semibold" : "text-muted-foreground",
+        nameSize[size]
       )}>
         {definition.name}
       </div>

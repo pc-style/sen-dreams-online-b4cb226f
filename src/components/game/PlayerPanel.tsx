@@ -1,11 +1,11 @@
 /**
- * Player Panel - Clean, accessible design
+ * Player Panel - Clean, neutral design
  */
 
 import { cn } from '@/lib/utils';
 import { PublicPlayerView, PublicDreamSlotView } from '@/game/types';
 import { DreamCard } from './DreamCard';
-import { User, Cat } from 'lucide-react';
+import { User } from 'lucide-react';
 
 interface PlayerPanelProps {
   player: PublicPlayerView;
@@ -34,12 +34,12 @@ export function PlayerPanel({
   
   return (
     <div className={cn(
-      "relative rounded-2xl transition-all",
-      "border-2 bg-slate-900/70 backdrop-blur-sm",
+      "relative rounded-xl transition-all",
+      "border bg-card/50 backdrop-blur-sm",
       player.isActivePlayer 
-        ? "border-purple-400/60 shadow-xl shadow-purple-500/30" 
-        : "border-purple-500/30",
-      isMe && "border-purple-400/50 bg-slate-900/80",
+        ? "border-primary/50 shadow-glow" 
+        : "border-border",
+      isMe && "bg-card/70",
       size === 'sm' ? "p-3" : "p-4 sm:p-5"
     )}>
       {/* Header */}
@@ -48,43 +48,46 @@ export function PlayerPanel({
           <div className={cn(
             "rounded-full flex items-center justify-center",
             isMe 
-              ? "bg-purple-500/40 text-purple-100" 
-              : "bg-slate-700/60 text-purple-300/70",
+              ? "bg-primary/20 text-primary" 
+              : "bg-muted text-muted-foreground",
             size === 'sm' ? "w-7 h-7" : "w-9 h-9 sm:w-10 sm:h-10"
           )}>
             <User className={size === 'sm' ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
           </div>
           <span className={cn(
             "font-semibold truncate",
-            isMe ? "text-purple-100" : "text-purple-200/90",
+            isMe ? "text-foreground" : "text-foreground/90",
             size === 'sm' ? "text-sm max-w-[80px]" : "text-base sm:text-lg max-w-[120px] sm:max-w-[150px]"
           )}>
             {player.playerName}
-            {isMe && <span className="text-purple-400/80 ml-1">(You)</span>}
+            {isMe && <span className="text-muted-foreground ml-1">(You)</span>}
           </span>
         </div>
         
+        {/* Score */}
         <div className={cn(
-          "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full",
-          "bg-slate-800/80 border border-purple-400/30"
+          "flex items-center gap-1.5 px-2.5 py-1 rounded-full",
+          "bg-muted/50 border border-border"
         )}>
-          <Cat className={cn(
-            "text-purple-400/80",
-            size === 'sm' ? "w-3.5 h-3.5" : "w-4 h-4 sm:w-5 sm:h-5"
-          )} />
           <span className={cn(
-            "font-bold text-purple-100",
+            "font-bold text-foreground",
             size === 'sm' ? "text-sm" : "text-base sm:text-lg"
           )}>
             {player.totalScore}
           </span>
+          <span className={cn(
+            "text-muted-foreground",
+            size === 'sm' ? "text-xs" : "text-sm"
+          )}>
+            pts
+          </span>
         </div>
       </div>
       
-      {/* Dream slots */}
+      {/* Dream slots - horizontal layout */}
       <div className={cn(
         "flex items-center justify-center flex-wrap",
-        size === 'sm' ? "gap-2 sm:gap-3" : "gap-3 sm:gap-4"
+        size === 'sm' ? "gap-2" : "gap-3 sm:gap-4"
       )}>
         {slots.map((slot, index) => (
           <DreamCard
@@ -102,15 +105,15 @@ export function PlayerPanel({
         ))}
       </div>
       
-      {/* Active indicator */}
+      {/* Active turn indicator */}
       {player.isActivePlayer && (
         <div className={cn(
-          "absolute -top-3 left-1/2 -translate-x-1/2",
-          "px-3 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-purple-500 to-indigo-500",
-          "text-white text-xs sm:text-sm font-bold rounded-full",
-          "shadow-lg shadow-purple-500/40"
+          "absolute -top-2.5 left-1/2 -translate-x-1/2",
+          "px-3 py-1 bg-primary text-primary-foreground",
+          "text-xs sm:text-sm font-bold rounded-full",
+          "shadow-md"
         )}>
-          Your Turn
+          {isMe ? "Your Turn" : "Playing..."}
         </div>
       )}
     </div>
