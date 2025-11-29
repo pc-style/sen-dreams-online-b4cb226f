@@ -1,5 +1,5 @@
 /**
- * Main Game Board Component - Dreamy themed
+ * Main Game Board Component - Accessible, responsive design
  */
 
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { CentralArea } from './CentralArea';
 import { ScoreBoard } from './ScoreBoard';
 import { EffectModal } from './EffectModal';
 import { Button } from '@/components/ui/button';
-import { Eye, ArrowRight, Moon, Sparkles, Star } from 'lucide-react';
+import { Eye, ArrowRight, Moon, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GameBoardProps {
@@ -25,11 +25,9 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
   const otherPlayers = gameView.players.filter(p => p.playerId !== gameView.myPlayerId);
   
   const getSelectableSlots = (): number[] => {
-    // During effect phase, all slots are selectable (for peek/swap)
     if (gameView.pendingEffect?.awaitingSelection) {
       return [0, 1, 2, 3];
     }
-    // During action phase with drawn card, can replace own slots
     if (gameView.isMyTurn && gameView.turnPhase === 'action' && gameView.drawnCard) {
       return [0, 1, 2, 3];
     }
@@ -52,42 +50,39 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
     }
   };
   
-  // Handle initial peek card selection
   const handlePeekSlotClick = (index: number) => {
     if (peekedSlots.includes(index)) {
-      // Deselect
       setPeekedSlots(peekedSlots.filter(i => i !== index));
     } else if (peekedSlots.length < 2) {
-      // Select (max 2)
       setPeekedSlots([...peekedSlots, index]);
     }
   };
   
   const handleAcknowledgePeek = () => {
-    setPeekedSlots([]); // Reset for next round
+    setPeekedSlots([]);
     onAction({ type: 'ACKNOWLEDGE_INITIAL_PEEK' });
   };
   
   // Initial peek phase
   if (gameView.phase === 'initial_peek') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 p-3 sm:p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 p-4 sm:p-6 relative overflow-hidden">
         <Stars />
-        <div className="max-w-lg mx-auto relative z-10">
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 mx-auto rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-400/30 mb-3">
-              <Eye className="w-7 h-7 text-purple-300" />
+        <div className="max-w-2xl mx-auto relative z-10">
+          <div className="text-center mb-8 sm:mb-10">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full bg-purple-500/30 flex items-center justify-center border-2 border-purple-400/40 mb-4 shadow-xl shadow-purple-500/30">
+              <Eye className="w-8 h-8 sm:w-10 sm:h-10 text-purple-200" />
             </div>
-            <h2 className="text-xl font-bold text-purple-100 mb-1">Choose 2 Cards to Peek</h2>
-            <p className="text-sm text-purple-300/70">
+            <h1 className="text-2xl sm:text-3xl font-bold text-purple-100 mb-2">Choose 2 Cards to Peek</h1>
+            <p className="text-base sm:text-lg text-purple-300/80">
               {peekedSlots.length < 2 
                 ? `Tap ${2 - peekedSlots.length} more card${peekedSlots.length === 1 ? '' : 's'} to memorize`
-                : 'Memorize these cards, then confirm!'}
+                : 'Memorize these values, then confirm!'}
             </p>
           </div>
           
           {myPlayer && (
-            <div className="mb-6">
+            <div className="mb-8 sm:mb-10">
               <PlayerPanel
                 player={myPlayer}
                 isMe={true}
@@ -96,7 +91,7 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
                 selectableSlots={!gameView.hasSeenInitialCards ? [0, 1, 2, 3] : []}
                 peekedSlots={peekedSlots}
                 onSlotClick={!gameView.hasSeenInitialCards ? handlePeekSlotClick : undefined}
-                compact
+                size="lg"
               />
             </div>
           )}
@@ -106,15 +101,16 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
               <Button
                 onClick={handleAcknowledgePeek}
                 disabled={peekedSlots.length !== 2}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white disabled:opacity-50"
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white disabled:opacity-50 font-bold text-base sm:text-lg px-8 py-4"
               >
                 I've memorized them
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           ) : (
-            <div className="text-center text-purple-300/60 animate-pulse text-sm">
-              Waiting for others...
+            <div className="text-center text-purple-300/70 animate-pulse text-base sm:text-lg">
+              Waiting for other players...
             </div>
           )}
         </div>
@@ -140,23 +136,23 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-950 to-slate-900 flex flex-col relative overflow-hidden">
       <Stars />
       
-      <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full p-3 sm:p-4 relative z-10">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-3 sm:p-4 md:p-6 relative z-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2 text-purple-200">
-            <Moon className="w-4 h-4" />
-            <span className="text-sm font-medium">Round {gameView.roundNumber}</span>
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <div className="flex items-center gap-2 sm:gap-3 text-purple-200">
+            <Moon className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-base sm:text-lg font-bold">Round {gameView.roundNumber}</span>
           </div>
-          <div className="text-xs text-purple-300/60">
+          <div className="text-sm sm:text-base text-purple-300/70 font-medium">
             {gameView.deckCount} cards left
           </div>
         </div>
         
         {/* Opponents */}
         <div className={cn(
-          "grid gap-2 mb-3",
-          otherPlayers.length === 1 && "grid-cols-1",
-          otherPlayers.length >= 2 && "grid-cols-2"
+          "grid gap-3 sm:gap-4 mb-4 sm:mb-6",
+          otherPlayers.length === 1 && "grid-cols-1 max-w-xl mx-auto w-full",
+          otherPlayers.length >= 2 && "grid-cols-1 sm:grid-cols-2"
         )}>
           {otherPlayers.map(player => (
             <PlayerPanel
@@ -165,7 +161,7 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
               isMe={false}
               selectableSlots={gameView.pendingEffect?.awaitingSelection ? [0, 1, 2, 3] : []}
               onSlotClick={(index) => handleOtherSlotClick(player.playerId, index)}
-              compact
+              size="sm"
             />
           ))}
         </div>
@@ -190,14 +186,14 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
         
         {/* My panel */}
         {myPlayer && (
-          <div className="mt-auto pt-3">
+          <div className="mt-auto pt-4 sm:pt-6">
             <PlayerPanel
               player={myPlayer}
               isMe={true}
               myDreamSlots={gameView.myDreamSlots}
               selectableSlots={selectableSlots}
               onSlotClick={handleSlotClick}
-              compact
+              size="md"
             />
           </div>
         )}
@@ -217,11 +213,12 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
 function Stars() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <Star className="absolute top-16 left-[10%] w-2 h-2 text-yellow-200/30 animate-pulse" />
-      <Star className="absolute top-24 right-[15%] w-1.5 h-1.5 text-yellow-200/20 animate-pulse" style={{ animationDelay: '0.5s' }} />
-      <Star className="absolute top-32 left-[30%] w-1.5 h-1.5 text-purple-300/30 animate-pulse" style={{ animationDelay: '1s' }} />
-      <Star className="absolute bottom-24 right-[20%] w-2 h-2 text-purple-300/20 animate-pulse" style={{ animationDelay: '0.7s' }} />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl" />
+      <Star className="absolute top-20 left-[8%] w-3 h-3 text-yellow-200/30 animate-pulse" />
+      <Star className="absolute top-28 right-[12%] w-2 h-2 text-yellow-200/25 animate-pulse" style={{ animationDelay: '0.5s' }} />
+      <Star className="absolute top-40 left-[25%] w-2 h-2 text-purple-300/30 animate-pulse" style={{ animationDelay: '1s' }} />
+      <Star className="absolute bottom-32 right-[18%] w-3 h-3 text-purple-300/25 animate-pulse" style={{ animationDelay: '0.7s' }} />
+      <Star className="absolute top-1/3 left-[5%] w-2 h-2 text-yellow-200/20 animate-pulse" style={{ animationDelay: '1.2s' }} />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl" />
     </div>
   );
 }
