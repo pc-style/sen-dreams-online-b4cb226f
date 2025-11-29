@@ -14,6 +14,7 @@ interface DreamCardProps {
   isSelected?: boolean;
   onClick?: () => void;
   showInitialPeek?: boolean;
+  isPeekedDuringSetup?: boolean; // Card user chose to peek during initial_peek
   compact?: boolean;
 }
 
@@ -25,12 +26,14 @@ export function DreamCard({
   isSelected = false,
   onClick,
   showInitialPeek = false,
+  isPeekedDuringSetup = false,
   compact = false,
 }: DreamCardProps) {
   const card = slot.card;
   const isVisible = card?.visible !== null && card?.visible !== undefined;
-  const canPeek = showInitialPeek && isOwn && (index === 0 || index === 3);
-  const shouldShow = isVisible || canPeek;
+  // During initial peek phase, only show card if player selected it to peek
+  // Otherwise, show based on normal visibility
+  const shouldShow = showInitialPeek ? isPeekedDuringSetup : isVisible;
   
   return (
     <button
@@ -69,9 +72,16 @@ export function DreamCard({
         {index + 1}
       </div>
       
-      {/* Peek indicator */}
-      {canPeek && !slot.isRevealed && (
+      {/* Peek indicator during setup */}
+      {showInitialPeek && !isPeekedDuringSetup && (
         <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500/80 flex items-center justify-center animate-pulse">
+          <Eye className="w-2.5 h-2.5 text-white" />
+        </div>
+      )}
+      
+      {/* Selected for peek indicator */}
+      {isPeekedDuringSetup && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500/80 flex items-center justify-center">
           <Eye className="w-2.5 h-2.5 text-white" />
         </div>
       )}
