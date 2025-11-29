@@ -43,8 +43,8 @@ export function DreamCard({
         !slot.hasCard && "border-dashed border-purple-400/20 bg-slate-800/30",
         slot.hasCard && !shouldShow && "bg-gradient-to-br from-purple-600 to-indigo-700 border-purple-400/30",
         slot.hasCard && shouldShow && "bg-slate-800/80 border-purple-400/40",
-        isSelectable && "cursor-pointer hover:scale-105 hover:shadow-purple-500/30 hover:border-purple-300",
-        isSelected && "ring-2 ring-purple-400 scale-105",
+        isSelectable && "cursor-pointer hover:scale-105 hover:shadow-lg hover:shadow-purple-400/40 hover:border-purple-300 animate-pulse ring-1 ring-purple-400/50",
+        isSelected && "ring-2 ring-purple-400 scale-105 animate-none",
         !isSelectable && !onClick && "cursor-default"
       )}
     >

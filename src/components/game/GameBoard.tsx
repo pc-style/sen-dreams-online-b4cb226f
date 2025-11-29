@@ -22,8 +22,12 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
   const otherPlayers = gameView.players.filter(p => p.playerId !== gameView.myPlayerId);
   
   const getSelectableSlots = (): number[] => {
-    if (!gameView.isMyTurn) return [];
-    if (gameView.turnPhase === 'action' && gameView.drawnCard) {
+    // During effect phase, all slots are selectable (for peek/swap)
+    if (gameView.pendingEffect?.awaitingSelection) {
+      return [0, 1, 2, 3];
+    }
+    // During action phase with drawn card, can replace own slots
+    if (gameView.isMyTurn && gameView.turnPhase === 'action' && gameView.drawnCard) {
       return [0, 1, 2, 3];
     }
     return [];
