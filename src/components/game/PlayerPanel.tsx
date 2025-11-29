@@ -1,5 +1,5 @@
 /**
- * Player Panel - Compact dreamy design
+ * Player Panel - Clean, accessible design
  */
 
 import { cn } from '@/lib/utils';
@@ -15,8 +15,8 @@ interface PlayerPanelProps {
   selectedSlot?: number | null;
   onSlotClick?: (index: number) => void;
   showInitialPeek?: boolean;
-  peekedSlots?: number[]; // Slots the player chose to peek during initial_peek
-  compact?: boolean;
+  peekedSlots?: number[];
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function PlayerPanel({
@@ -28,44 +28,64 @@ export function PlayerPanel({
   onSlotClick,
   showInitialPeek = false,
   peekedSlots = [],
-  compact = false,
+  size = 'md',
 }: PlayerPanelProps) {
   const slots = isMe && myDreamSlots ? myDreamSlots : player.dreamSlots;
   
   return (
     <div className={cn(
-      "relative rounded-xl transition-all",
-      "border bg-slate-900/60 backdrop-blur-sm",
-      player.isActivePlayer ? "border-purple-400/50 shadow-lg shadow-purple-500/20" : "border-purple-500/20",
-      isMe && "border-purple-400/40",
-      compact ? "p-2 sm:p-3" : "p-3 sm:p-4"
+      "relative rounded-2xl transition-all",
+      "border-2 bg-slate-900/70 backdrop-blur-sm",
+      player.isActivePlayer 
+        ? "border-purple-400/60 shadow-xl shadow-purple-500/30" 
+        : "border-purple-500/30",
+      isMe && "border-purple-400/50 bg-slate-900/80",
+      size === 'sm' ? "p-3" : "p-4 sm:p-5"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className={cn(
-            "w-6 h-6 rounded-full flex items-center justify-center",
-            isMe ? "bg-purple-500/30 text-purple-200" : "bg-slate-700/50 text-purple-300/60"
+            "rounded-full flex items-center justify-center",
+            isMe 
+              ? "bg-purple-500/40 text-purple-100" 
+              : "bg-slate-700/60 text-purple-300/70",
+            size === 'sm' ? "w-7 h-7" : "w-9 h-9 sm:w-10 sm:h-10"
           )}>
-            <User className="w-3 h-3" />
+            <User className={size === 'sm' ? "w-4 h-4" : "w-5 h-5 sm:w-6 sm:h-6"} />
           </div>
           <span className={cn(
-            "text-xs sm:text-sm font-medium truncate max-w-[100px]",
-            isMe ? "text-purple-200" : "text-purple-300/80"
+            "font-semibold truncate",
+            isMe ? "text-purple-100" : "text-purple-200/90",
+            size === 'sm' ? "text-sm max-w-[80px]" : "text-base sm:text-lg max-w-[120px] sm:max-w-[150px]"
           )}>
             {player.playerName}
-            {isMe && " (You)"}
+            {isMe && <span className="text-purple-400/80 ml-1">(You)</span>}
           </span>
         </div>
         
-        <div className="flex items-center gap-1 text-purple-200">
-          <Cat className="w-3 h-3 text-purple-400/60" />
-          <span className="text-sm font-bold">{player.totalScore}</span>
+        <div className={cn(
+          "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full",
+          "bg-slate-800/80 border border-purple-400/30"
+        )}>
+          <Cat className={cn(
+            "text-purple-400/80",
+            size === 'sm' ? "w-3.5 h-3.5" : "w-4 h-4 sm:w-5 sm:h-5"
+          )} />
+          <span className={cn(
+            "font-bold text-purple-100",
+            size === 'sm' ? "text-sm" : "text-base sm:text-lg"
+          )}>
+            {player.totalScore}
+          </span>
         </div>
       </div>
       
       {/* Dream slots */}
-      <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+      <div className={cn(
+        "flex items-center justify-center flex-wrap",
+        size === 'sm' ? "gap-2 sm:gap-3" : "gap-3 sm:gap-4"
+      )}>
         {slots.map((slot, index) => (
           <DreamCard
             key={index}
@@ -77,15 +97,20 @@ export function PlayerPanel({
             onClick={onSlotClick ? () => onSlotClick(index) : undefined}
             showInitialPeek={showInitialPeek}
             isPeekedDuringSetup={peekedSlots.includes(index)}
-            compact={compact}
+            size={size}
           />
         ))}
       </div>
       
       {/* Active indicator */}
       {player.isActivePlayer && (
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-purple-500/80 text-purple-100 text-[10px] font-medium rounded-full">
-          Turn
+        <div className={cn(
+          "absolute -top-3 left-1/2 -translate-x-1/2",
+          "px-3 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-purple-500 to-indigo-500",
+          "text-white text-xs sm:text-sm font-bold rounded-full",
+          "shadow-lg shadow-purple-500/40"
+        )}>
+          Your Turn
         </div>
       )}
     </div>
