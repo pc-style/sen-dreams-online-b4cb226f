@@ -2,6 +2,7 @@
  * Main Game Board Component - Dreamy themed
  */
 
+import { useState } from 'react';
 import { PlayerGameView, PlayerAction } from '@/game/types';
 import { PlayerPanel } from './PlayerPanel';
 import { CentralArea } from './CentralArea';
@@ -18,6 +19,8 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
+  const [peekedSlots, setPeekedSlots] = useState<number[]>([]);
+  
   const myPlayer = gameView.players.find(p => p.playerId === gameView.myPlayerId);
   const otherPlayers = gameView.players.filter(p => p.playerId !== gameView.myPlayerId);
   
@@ -52,6 +55,22 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
   const drawnCardHasEffect = gameView.drawnCard?.visible?.effectType !== 'none' && 
                              gameView.drawnCard?.visible?.effectType !== undefined;
   
+  // Handle initial peek card selection
+  const handlePeekSlotClick = (index: number) => {
+    if (peekedSlots.includes(index)) {
+      // Deselect
+      setPeekedSlots(peekedSlots.filter(i => i !== index));
+    } else if (peekedSlots.length < 2) {
+      // Select (max 2)
+      setPeekedSlots([...peekedSlots, index]);
+    }
+  };
+  
+  const handleAcknowledgePeek = () => {
+    setPeekedSlots([]); // Reset for next round
+    onAction({ type: 'ACKNOWLEDGE_INITIAL_PEEK' });
+  };
+  
   // Initial peek phase
   if (gameView.phase === 'initial_peek') {
     return (
@@ -62,9 +81,11 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
             <div className="w-14 h-14 mx-auto rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-400/30 mb-3">
               <Eye className="w-7 h-7 text-purple-300" />
             </div>
-            <h2 className="text-xl font-bold text-purple-100 mb-1">Peek at Your Cards</h2>
+            <h2 className="text-xl font-bold text-purple-100 mb-1">Choose 2 Cards to Peek</h2>
             <p className="text-sm text-purple-300/70">
-              Memorize your first and last cards!
+              {peekedSlots.length < 2 
+                ? `Tap ${2 - peekedSlots.length} more card${peekedSlots.length === 1 ? '' : 's'} to memorize`
+                : 'Memorize these cards, then confirm!'}
             </p>
           </div>
           
@@ -75,6 +96,9 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
                 isMe={true}
                 myDreamSlots={gameView.myDreamSlots}
                 showInitialPeek={!gameView.hasSeenInitialCards}
+                selectableSlots={!gameView.hasSeenInitialCards ? [0, 1, 2, 3] : []}
+                peekedSlots={peekedSlots}
+                onSlotClick={!gameView.hasSeenInitialCards ? handlePeekSlotClick : undefined}
                 compact
               />
             </div>
@@ -83,8 +107,9 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
           {!gameView.hasSeenInitialCards ? (
             <div className="text-center">
               <Button
-                onClick={() => onAction({ type: 'ACKNOWLEDGE_INITIAL_PEEK' })}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white"
+                onClick={handleAcknowledgePeek}
+                disabled={peekedSlots.length !== 2}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white disabled:opacity-50"
               >
                 I've memorized them
                 <ArrowRight className="w-4 h-4 ml-2" />

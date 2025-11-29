@@ -368,7 +368,7 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
       slot.isRevealed || 
       state.phase === 'scoring' || 
       state.phase === 'game_over' ||
-      (state.phase === 'initial_peek' && (index === 0 || index === 3));
+      state.phase === 'initial_peek'; // Allow peeking at any card during setup - client controls which
     
     return {
       hasCard: slot.card !== null,

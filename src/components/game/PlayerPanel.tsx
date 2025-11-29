@@ -15,6 +15,7 @@ interface PlayerPanelProps {
   selectedSlot?: number | null;
   onSlotClick?: (index: number) => void;
   showInitialPeek?: boolean;
+  peekedSlots?: number[]; // Slots the player chose to peek during initial_peek
   compact?: boolean;
 }
 
@@ -26,6 +27,7 @@ export function PlayerPanel({
   selectedSlot = null,
   onSlotClick,
   showInitialPeek = false,
+  peekedSlots = [],
   compact = false,
 }: PlayerPanelProps) {
   const slots = isMe && myDreamSlots ? myDreamSlots : player.dreamSlots;
@@ -74,6 +76,7 @@ export function PlayerPanel({
             isSelected={selectedSlot === index}
             onClick={onSlotClick ? () => onSlotClick(index) : undefined}
             showInitialPeek={showInitialPeek}
+            isPeekedDuringSetup={peekedSlots.includes(index)}
             compact={compact}
           />
         ))}
