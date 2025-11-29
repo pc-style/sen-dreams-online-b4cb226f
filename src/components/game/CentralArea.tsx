@@ -20,7 +20,8 @@ interface CentralAreaProps {
   onUseEffect: () => void;
   onDeclareWakeUp: () => void;
   onChooseTakeTwo: (index: number) => void;
-  hasEffect: boolean;
+  canDiscard: boolean;
+  canUseEffect: boolean;
 }
 
 export function CentralArea({
@@ -36,7 +37,8 @@ export function CentralArea({
   onUseEffect,
   onDeclareWakeUp,
   onChooseTakeTwo,
-  hasEffect,
+  canDiscard,
+  canUseEffect,
 }: CentralAreaProps) {
   const showDrawOptions = isMyTurn && turnPhase === 'draw';
   const showActionOptions = isMyTurn && turnPhase === 'action' && drawnCard;
@@ -135,15 +137,17 @@ export function CentralArea({
           
           {showActionOptions && (
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <Button 
-                onClick={onDiscard} 
-                variant="outline" 
-                size="sm"
-                className="bg-transparent border-purple-400/30 text-purple-200 hover:bg-purple-500/10 text-xs h-7"
-              >
-                Discard
-              </Button>
-              {hasEffect && (
+              {canDiscard && (
+                <Button 
+                  onClick={onDiscard} 
+                  variant="outline" 
+                  size="sm"
+                  className="bg-transparent border-purple-400/30 text-purple-200 hover:bg-purple-500/10 text-xs h-7"
+                >
+                  Discard
+                </Button>
+              )}
+              {canUseEffect && (
                 <Button 
                   onClick={onUseEffect} 
                   size="sm"
@@ -157,7 +161,7 @@ export function CentralArea({
           )}
           {showActionOptions && (
             <p className="text-[10px] text-purple-400/50 text-center">
-              Or tap a dream slot to replace
+              {canDiscard ? 'Or tap a dream slot to replace' : 'Tap a dream slot to replace (must swap)'}
             </p>
           )}
         </div>
