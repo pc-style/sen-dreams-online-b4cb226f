@@ -44,6 +44,7 @@ export function createInitialGameState(
       roundScore: 0,
       totalScore: 0,
       hasSeenInitialCards: false,
+      initialPeekedSlots: [],
     };
   });
   
@@ -76,7 +77,17 @@ export function isActionValid(state: GameState, playerId: string, action: Player
   
   switch (action.type) {
     case 'ACKNOWLEDGE_INITIAL_PEEK':
-      return state.phase === 'initial_peek' && !player.hasSeenInitialCards;
+      return state.phase === 'initial_peek' &&
+             !player.hasSeenInitialCards &&
+             player.initialPeekedSlots.length === 2;
+
+    case 'REVEAL_INITIAL_CARD':
+      return state.phase === 'initial_peek' &&
+             !player.hasSeenInitialCards &&
+             player.initialPeekedSlots.length < 2 &&
+             action.slotIndex >= 0 &&
+             action.slotIndex < 4 &&
+             !player.initialPeekedSlots.includes(action.slotIndex);
       
     case 'DRAW_FROM_DECK':
       return isActivePlayer && state.phase === 'playing' && state.turnPhase === 'draw' && state.deck.length > 0;
@@ -155,6 +166,10 @@ export function applyAction(state: GameState, playerId: string, action: PlayerAc
       if (newState.players.every(p => p.hasSeenInitialCards)) {
         newState.phase = 'playing';
       }
+      break;
+
+    case 'REVEAL_INITIAL_CARD':
+      player.initialPeekedSlots.push(action.slotIndex);
       break;
       
     case 'DRAW_FROM_DECK':
@@ -349,6 +364,7 @@ export function startNewRound(state: GameState): GameState {
     }
     player.roundScore = 0;
     player.hasSeenInitialCards = false;
+    player.initialPeekedSlots = [];
   }
   
   const firstDiscard = deck.pop()!;
@@ -377,7 +393,7 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
       slot.isRevealed || 
       state.phase === 'scoring' || 
       state.phase === 'game_over' ||
-      (state.phase === 'initial_peek' && !viewerPlayer.hasSeenInitialCards); // Only show during peek if not yet acknowledged
+      (state.phase === 'initial_peek' && viewerPlayer.initialPeekedSlots.includes(index));
     
     return {
       hasCard: slot.card !== null,
@@ -455,6 +471,7 @@ export function derivePlayerView(state: GameState, viewerId: string): PlayerGame
     myTotalScore: viewerPlayer?.totalScore ?? 0,
     myRoundScore: viewerPlayer?.roundScore ?? 0,
     hasSeenInitialCards: viewerPlayer?.hasSeenInitialCards ?? false,
+    initialPeekedSlots: viewerPlayer?.initialPeekedSlots ?? [],
     players,
     deckCount: state.deck.length,
     topDiscard: topDiscard ? {
