@@ -67,6 +67,7 @@ export interface GameState {
   pendingEffect: PendingEffect | null;
   targetScore: number;
   version: number;
+  wakeUpCallerId: string | null; // Track who called Pobudka
 }
 
 export interface PendingEffect {
