@@ -138,6 +138,22 @@
   .animate-pulse-soft {
     animation: pulse-soft 3s ease-in-out infinite;
   }
+
+  /* Mobile-friendly viewport heights - fixes h-screen on mobile browsers */
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height */
+  }
+
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height - accounts for mobile browser UI */
+  }
+
+  .max-h-screen-safe {
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
 }
 
 @keyframes pulse-soft {

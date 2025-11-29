@@ -17,7 +17,7 @@ export default function Game() {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen-safe bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
           <p className="text-muted-foreground">Loading game...</p>
@@ -28,7 +28,7 @@ export default function Game() {
   
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen-safe bg-background flex items-center justify-center p-6">
         <div className="text-center space-y-4">
           <Moon className="w-12 h-12 mx-auto text-muted-foreground" />
           <h1 className="text-2xl font-bold">Game Error</h1>
@@ -44,7 +44,7 @@ export default function Game() {
   
   if (!gameView) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen-safe bg-background flex items-center justify-center p-6">
         <div className="text-center space-y-4">
           <Moon className="w-12 h-12 mx-auto text-muted-foreground" />
           <h1 className="text-2xl font-bold">Game Not Found</h1>

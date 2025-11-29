@@ -40,10 +40,10 @@ export function PlayerPanel({
         ? "border-primary/50 shadow-glow" 
         : "border-border",
       isMe && "bg-card/70",
-      size === 'sm' ? "p-3" : "p-4 sm:p-5"
+      size === 'sm' ? "p-2 sm:p-3" : "p-3 sm:p-4 md:p-5"
     )}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 sm:mb-4">
+      <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className={cn(
             "rounded-full flex items-center justify-center",
@@ -87,7 +87,7 @@ export function PlayerPanel({
       {/* Dream slots - horizontal layout */}
       <div className={cn(
         "flex items-center justify-center flex-wrap",
-        size === 'sm' ? "gap-2" : "gap-3 sm:gap-4"
+        size === 'sm' ? "gap-1.5 sm:gap-2" : "gap-2 sm:gap-3 md:gap-4"
       )}>
         {slots.map((slot, index) => (
           <DreamCard

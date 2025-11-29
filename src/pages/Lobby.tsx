@@ -61,7 +61,7 @@ export default function Lobby() {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen-safe bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -69,7 +69,7 @@ export default function Lobby() {
   
   if (!room) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen-safe bg-background flex items-center justify-center p-6">
         <div className="text-center space-y-4">
           <Moon className="w-12 h-12 mx-auto text-muted-foreground" />
           <h1 className="text-2xl font-bold text-foreground">Room Not Found</h1>
@@ -83,7 +83,7 @@ export default function Lobby() {
   }
   
   return (
-    <div className="min-h-screen bg-background p-4 sm:p-6">
+    <div className="min-h-screen-safe bg-background p-4 sm:p-6">
       <div className="max-w-md mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">

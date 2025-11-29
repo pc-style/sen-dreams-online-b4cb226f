@@ -66,7 +66,7 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
   // Initial peek phase
   if (gameView.phase === 'initial_peek') {
     return (
-      <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <div className="h-screen-safe bg-background flex flex-col overflow-hidden">
         <div className="flex-1 flex flex-col items-center justify-center p-4 min-h-0">
           {/* Header */}
           <div className="text-center mb-6 shrink-0">
@@ -135,17 +135,17 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
   
   // Main game - fixed height layout
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-2 sm:p-3 min-h-0">
+    <div className="h-screen-safe bg-background flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-1.5 sm:p-2 md:p-3 min-h-0">
         {/* Header - compact */}
-        <header className="flex items-center justify-between py-2 px-1 shrink-0">
-          <span className="text-sm font-semibold text-foreground">Round {gameView.roundNumber}</span>
-          <span className="text-sm text-muted-foreground">{gameView.deckCount} cards</span>
+        <header className="flex items-center justify-between py-1 px-1 shrink-0">
+          <span className="text-xs sm:text-sm font-semibold text-foreground">Round {gameView.roundNumber}</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">{gameView.deckCount} cards</span>
         </header>
         
         {/* Opponents - compact, shrink if needed */}
         <div className={cn(
-          "shrink-0 grid gap-2 mb-2",
+          "shrink-0 grid gap-1.5 sm:gap-2 mb-1.5 sm:mb-2",
           otherPlayers.length === 1 && "grid-cols-1 max-w-md mx-auto w-full",
           otherPlayers.length >= 2 && "grid-cols-2"
         )}>
@@ -183,7 +183,7 @@ export function GameBoard({ gameView, onAction, onNewRound }: GameBoardProps) {
         
         {/* My panel - fixed at bottom */}
         {myPlayer && (
-          <div className="shrink-0 pt-2">
+          <div className="shrink-0 pt-1.5 sm:pt-2">
             <PlayerPanel
               player={myPlayer}
               isMe={true}
