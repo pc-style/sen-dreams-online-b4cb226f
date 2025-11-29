@@ -118,10 +118,6 @@ export default {
           '0%': { opacity: '0', transform: 'translateY(-20px) scale(0.95)' },
           '100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
         },
-        'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 0 0 hsl(var(--game-gold) / 0.4)' },
-          '50%': { boxShadow: '0 0 0 8px hsl(var(--game-gold) / 0)' }
-        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -130,8 +126,7 @@ export default {
         'fade-out': 'fade-out 0.3s ease-out',
         'scale-in': 'scale-in 0.2s ease-out',
         'slide-up': 'slide-up 0.4s ease-out',
-        'card-enter': 'card-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+        'card-enter': 'card-enter 0.4s ease-out'
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
